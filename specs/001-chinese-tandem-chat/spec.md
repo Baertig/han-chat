@@ -168,6 +168,10 @@ with a diff dialog showing the correction.
 - What happens when the AI endpoint is unreachable? The app MUST show an inline error
   on the message bubble and allow the user to retry; it MUST NOT crash or show a blank
   screen.
+- What happens when one of the two parallel calls fails but the other succeeds? Each
+  call fails independently: if the chat reply fails the bubble shows a retry error; if
+  the feedback call fails the icon shows an error state (distinct from green/red)
+  without affecting the displayed reply.
 - What happens when a user sends a non-Chinese message (e.g., English or emoji)?
   Feedback and word-lookup features gracefully indicate they are not applicable
   rather than returning errors.
@@ -177,8 +181,12 @@ with a diff dialog showing the correction.
   be persisted? The user is notified and the message send is aborted cleanly.
 - What happens when a persona is deleted that has existing conversations? Existing
   conversations are retained but displayed with a "Deleted persona" placeholder.
-- What happens when profile image upload fails or the selected file is not an image?
-  A user-friendly error is shown and the persona can still be saved without an image.
+- What happens when no API key has been stored yet and the user tries to send a
+  message? The app MUST redirect the user to the settings screen with an explanatory
+  message before attempting any LLM call.
+- What happens when the Credential Management API is unavailable in the user's
+  browser? The app MUST inform the user that secure key storage is not supported in
+  their browser and MUST NOT fall back to localStorage silently.
 
 ## Requirements _(mandatory)_
 
@@ -195,15 +203,22 @@ with a diff dialog showing the correction.
   before storage.
 - **FR-005**: The system MUST persist all personas and conversation histories in
   browser-native local storage so data survives page reloads.
-- **FR-006**: The chat screen MUST send each user message to an external AI endpoint
-  using the persona's system prompt as context and display the AI reply in the chat.
+- **FR-006**: When the user sends a message, the chat screen MUST fire two parallel
+  LLM calls simultaneously: one for the conversational reply (using the persona's
+  system prompt and a sliding window of the last N messages as context) and one for
+  grammar feedback. The AI reply MUST be displayed as soon as the reply call resolves,
+  independently of the feedback call. N defaults to 8 and is user-configurable.
 - **FR-007**: Every Chinese word or character in a chat message (sent or received)
   MUST be tappable and trigger a pinyin and translation popup.
 - **FR-008**: Users MUST be able to press-and-drag over a span of Chinese text in any
   message to trigger a pinyin and translation popup for the selected phrase.
-- **FR-009**: The system MUST request grammar feedback from the AI for every message
-  the user sends and attach a feedback icon to that message bubble — green when
-  correct, red when errors are present.
+- **FR-009**: The grammar feedback call (fired in parallel with FR-006) MUST resolve
+  independently and attach a feedback icon to the sent message bubble — green when
+  correct, red when errors are present — as soon as its result arrives. A loading
+  indicator MUST be shown on the bubble until the feedback call resolves or fails.
+- **FR-016**: The settings screen MUST allow the user to configure the conversation
+  context window size (N). The default value is 8. The setting MUST be persisted in
+  browser-native local storage and applied to all subsequent LLM calls.
 - **FR-010**: Tapping a green feedback icon MUST open a dialog showing the English
   translation of the user's sent message.
 - **FR-011**: Tapping a red feedback icon MUST open a dialog showing the user's
@@ -215,6 +230,13 @@ with a diff dialog showing the correction.
 - **FR-013**: All user data (personas, conversations, messages) MUST be stored
   exclusively on the user's device; no data is transmitted to any server operated
   by this project.
+- **FR-014**: The app MUST provide a settings screen where the user can enter their
+  LLM API key. The key MUST be stored using the browser Credential Management API
+  and MUST NOT be written to localStorage, sessionStorage, or any other plain-text
+  client storage.
+- **FR-015**: When no API key is stored, the app MUST prompt the user to enter one
+  before any LLM call is attempted, and MUST display a clear explanation of why the
+  key is needed.
 
 ### Key Entities
 
@@ -227,6 +249,9 @@ with a diff dialog showing the correction.
 - **FeedbackResult**: Associated with a user Message. Contains a correctness flag, an
   English translation of the user's original text, and an optional structured diff
   between the original and the corrected version.
+- **AppSettings**: Device-level configuration. Includes the LLM API key (stored via
+  Credential Management API) and the context window size N (stored in local storage,
+  default 8).
 
 ## Success Criteria _(mandatory)_
 
@@ -245,12 +270,24 @@ with a diff dialog showing the correction.
 - **SC-006**: The correction diff dialog correctly highlights wrong characters in red
   and added/missing characters in green for 100% of cases used in E2E test scenarios.
 
+## Clarifications
+
+### Session 2026-03-25
+
+- Q: Where is the user's LLM API key entered and stored? → A: In-app settings screen; key stored via the browser Credential Management API (not localStorage) for secure on-device storage.
+- Q: How are the chat reply and grammar feedback LLM calls structured per message? → A: Two separate parallel calls — chat reply and feedback are requested simultaneously; each result is shown in the UI as soon as it arrives.
+- Q: How much conversation history is sent as context with each LLM call? → A: Sliding window of last N messages; default N=8, user-configurable in app settings.
+- Q: What is the source for pinyin and translation lookups? → A: LLM via a single structured-output (JSON) call provides the translation for individual word translations. The drag tranlsations should trigger a separate API call.  
+
 ## Assumptions
 
 - The app targets a single user per device; there is no multi-user or account system.
 - The AI endpoint is an external third-party service (e.g., an OpenAI-compatible
-  API); the user supplies their own API key via app settings (API key management is
-  not in scope for this feature but is a prerequisite for LLM calls to function).
+  API); the user supplies their own API key via an in-app settings screen. The key is
+  stored using the browser Credential Management API for secure on-device storage.
+- The context window size N (default 8) is user-configurable via the settings screen
+  and stored in local storage. Only the last N messages are sent as history with each
+  LLM call.
 - Pinyin and translation lookups are performed via a bundled dictionary or a
   third-party dictionary API; the exact source is a planning-phase decision.
 - The primary target is a modern smartphone browser (mobile-first layout), though the
