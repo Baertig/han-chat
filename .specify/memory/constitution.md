@@ -1,39 +1,3 @@
-<!--
-SYNC IMPACT REPORT
-==================
-Version change: [PLACEHOLDER] → 1.0.0
-Bump rationale: Initial constitution creation from blank template (MINOR baseline).
-
-Modified principles:
-  - [PRINCIPLE_1_NAME] → I. Client-Only Architecture (new)
-  - [PRINCIPLE_2_NAME] → II. Test-First Development (new)
-  - [PRINCIPLE_3_NAME] → III. E2E Tests for User Interaction (new)
-  - [PRINCIPLE_4_NAME] → IV. Simplicity & YAGNI (new)
-  - [PRINCIPLE_5_NAME] → V. Offline-First & Privacy (new)
-
-Added sections:
-  - Technology Constraints (client-side stack boundaries)
-  - Development Workflow (solo TDD cycle)
-
-Removed sections: none
-
-Templates requiring updates:
-  ✅ .specify/memory/constitution.md — this file (updated now)
-  ⚠ .specify/templates/plan-template.md — Constitution Check section references
-      generic gates; review that "no backend/server tasks" is enforced as a gate
-      when plan.md is generated for this project.
-  ⚠ .specify/templates/tasks-template.md — "Parallel Team Strategy" section
-      references multiple developers; solo-project context should be noted when
-      generating tasks.md (no parallel-team sections needed).
-  ⚠ .specify/templates/spec-template.md — Assumptions section placeholder
-      "Users have stable internet connectivity" may be misleading for an
-      offline-capable client-only app; adjust when generating spec.md.
-
-Deferred TODOs:
-  - TODO(RATIFICATION_DATE): Date set to today (2026-03-25) as initial creation.
-    If project was started earlier, update to the actual project inception date.
--->
-
 # han-chat Constitution
 
 ## Core Principles
@@ -45,16 +9,13 @@ server-side components, no backend services, and no server-rendered pages
 owned by this project. All data processing, state management, and logic MUST
 execute in the user's browser.
 
-- External third-party APIs (e.g., AI inference endpoints) are permitted only
-  as optional runtime integrations; the app MUST remain functional (or
-  degrade gracefully) when such endpoints are unavailable.
-- No build-time or runtime dependency on a custom server process is allowed.
+- External third-party APIs (e.g., AI inference endpoints) are permitted; However, the app MUST remain functional (or degrade gracefully) when such endpoints are unavailable.
 - Deployment MUST be achievable as a set of static files (HTML, CSS, JS,
   assets) served from any static host or opened directly from the filesystem.
 
 **Rationale**: The client-only constraint is the defining architectural
 boundary of this project. Violating it introduces operational complexity
-(hosting, scaling, auth, cost) incompatible with a solo client-side app.
+(hosting, scaling, auth, cost)
 
 ### II. Test-First Development (NON-NEGOTIABLE)
 
@@ -80,8 +41,7 @@ living documentation of intended behaviour.
 Every distinct user-facing interaction flow (as defined in spec.md user
 stories) MUST have at least one end-to-end (E2E) test covering the happy path.
 
-- E2E tests MUST simulate real browser behaviour (e.g., via Playwright or
-  Cypress) and MUST NOT mock the DOM or application logic.
+- E2E tests MUST simulate real browser behaviour and MUST NOT mock the DOM or application logic.
 - E2E tests for a user story MUST be written before the story's implementation
   begins (consistent with Principle II).
 - E2E tests MUST pass against the built/bundled output, not just the dev
@@ -112,38 +72,17 @@ are prohibited.
 because there is no peer pressure to keep things simple. YAGNI is a hard rule,
 not a guideline.
 
-### V. Offline-First & Privacy
-
-The application MUST function fully without a network connection (aside from
-optional third-party integrations covered by Principle I).
-
-- All persistent state MUST be stored in browser-native storage
-  (localStorage, IndexedDB, or similar client APIs). No remote persistence
-  is permitted.
-- No user data MUST be transmitted to any server controlled by this project.
-- If third-party integrations are used, the privacy implications MUST be
-  clearly disclosed in the UI before any data is sent.
-
-**Rationale**: Client-only architecture implies that user data stays on the
-device. This is both a technical constraint (no server) and a trust commitment
-to users.
-
 ## Technology Constraints
 
 - **Runtime target**: Modern evergreen browsers (Chrome, Firefox, Safari,
   Edge — current and one prior major version).
-- **Build output**: Static files only; no SSR, no edge functions, no
-  server-side rendering step.
+- **Build output**: Static files only 
 - **Storage**: Browser-native APIs only (localStorage, IndexedDB,
   sessionStorage, Cache API).
-- **Testing stack**: Unit/integration tests via Vitest (or Jest); E2E via
-  Playwright (preferred) or Cypress. Test framework choice MUST be made at
-  project initialisation and MUST NOT be changed mid-feature without a
+- **Testing stack**: Unit/integration tests and E2E tests. Test framework choice MUST be made at project initialisation and MUST NOT be changed mid-feature without a
   constitution amendment.
 - **Network**: Fetch/WebSocket to third-party endpoints is permitted; any
   custom backend endpoint is prohibited.
-- **No native app wrappers** (Electron, Capacitor) unless a constitution
-  amendment is ratified.
 
 ## Development Workflow
 
@@ -163,10 +102,6 @@ with self-review checkpoints.
    with justification.
 8. **Commit**: One logical unit of work per commit; tests MUST pass.
 
-**Solo exception**: The "Parallel Team Strategy" section in task templates is
-not applicable; tasks are executed sequentially in priority order (P1 → P2
-→ P3).
-
 ## Governance
 
 This constitution supersedes all other development practices for this project.
@@ -180,11 +115,10 @@ increment the version according to semantic versioning rules defined below.
 - **PATCH**: Clarifications, wording improvements, or non-semantic refinements.
 
 All feature `plan.md` files MUST include a Constitution Check section that
-verifies compliance with all five Core Principles before implementation begins.
+verifies compliance with all four Core Principles before implementation begins.
 Any violation requires a justification entry in the Complexity Tracking table.
 
 The development workflow (self-review step) MUST be followed for every feature.
-Complexity MUST be justified; unsupported complexity is a constitution
-violation.
+Complexity MUST be justified 
 
 **Version**: 1.0.0 | **Ratified**: 2026-03-25 | **Last Amended**: 2026-03-25
