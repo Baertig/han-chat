@@ -10,7 +10,7 @@
 ### User Story 1 - Persona Selection and Conversation Start (Priority: P1)
 
 A learner opens the app and sees a home screen listing all their past conversations.
-From here they can pick an existing persona to start a new conversation, or tap a
+From here they can resume a conversation, pick an existing persona to start a new conversation, or tap a
 button to create a brand-new persona. Once a persona is chosen, the chat screen opens
 and they can begin exchanging messages.
 
