@@ -20,7 +20,7 @@ Content-Type: application/json
 **Body**:
 ```json
 {
-  "model": "<user-selected model string>",
+  "model": "<settings.feedbackModel, default 'deepseek/deepseek-v3.2'>",
   "response_format": {
     "type": "json_schema",
     "json_schema": {

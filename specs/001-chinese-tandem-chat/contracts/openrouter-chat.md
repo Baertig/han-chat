@@ -20,7 +20,7 @@ Content-Type: application/json
 **Body**:
 ```json
 {
-  "model": "<user-selected model string, e.g. anthropic/claude-3.5-sonnet>",
+  "model": "<settings.chatModel, default 'deepseek/deepseek-v3.2'>",
   "messages": [
     { "role": "system", "content": "<persona.systemPrompt>" },
     { "role": "user",      "content": "<message N-7 content>" },

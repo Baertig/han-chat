@@ -145,11 +145,15 @@ Device-level configuration. Not tied to any user identity.
 ```typescript
 interface AppSettings {
   contextWindowSize: number  // Default: 8; range: 1–50; user-configurable
+  chatModel: string          // Default: 'deepseek/deepseek-v3.2'; model for chat reply calls
+  feedbackModel: string      // Default: 'deepseek/deepseek-v3.2'; model for grammar feedback calls
+  translationModel: string   // Default: 'openai/gpt-oss-120b'; model for word translation calls
+  phraseLookupModel: string  // Default: 'openai/gpt-oss-120b'; model for phrase lookup calls
   // Note: API key is NOT stored here — it lives in the Credential Management API
 }
 ```
 
-**Persistence**: `contextWindowSize` → localStorage via `settings` Pinia store.
+**Persistence**: `contextWindowSize` and all model strings → localStorage via `settings` Pinia store.
 **API key**: Retrieved at runtime via `navigator.credentials.get()`; never stored in AppSettings.
 
 ---

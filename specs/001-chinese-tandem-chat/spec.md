@@ -237,6 +237,12 @@ with a diff dialog showing the correction.
 - **FR-015**: When no API key is stored, the app MUST prompt the user to enter one
   before any LLM call is attempted, and MUST display a clear explanation of why the
   key is needed.
+- **FR-017**: The settings screen MUST allow the user to configure the LLM model
+  string independently for each of the four call types: chat reply, grammar
+  feedback, word translation, and phrase lookup. Each MUST default to
+  `deepseek/deepseek-v3.2` for chat reply and grammar feedback,
+  `openai/gpt-oss-120b` for word translation and phrase lookup) and MUST be
+  persisted in browser-native local storage.
 
 ### Key Entities
 
@@ -250,8 +256,9 @@ with a diff dialog showing the correction.
   English translation of the user's original text, and an optional structured diff
   between the original and the corrected version.
 - **AppSettings**: Device-level configuration. Includes the LLM API key (stored via
-  Credential Management API) and the context window size N (stored in local storage,
-  default 8).
+  Credential Management API), the context window size N (stored in local storage,
+  default 8), and per-action LLM model strings for chat reply, grammar feedback,
+  word translation, and phrase lookup (each stored in local storage).
 
 ## Success Criteria _(mandatory)_
 

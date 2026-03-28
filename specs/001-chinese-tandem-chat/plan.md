@@ -27,8 +27,8 @@ Management API). Deployed as static files; no backend.
 
 **Storage**:
 
-- Personas, conversations, messages, settings → localStorage (via
-  pinia-plugin-persistedstate)
+- Personas, conversations, messages, settings (context window size N + per-action
+  LLM model strings) → localStorage (via pinia-plugin-persistedstate)
 - LLM API key → browser Credential Management API (`PasswordCredential`)
 - Profile images → data URIs in localStorage (resized client-side before storage)
 

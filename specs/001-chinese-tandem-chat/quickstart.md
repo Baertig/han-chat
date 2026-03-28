@@ -188,7 +188,7 @@ After completing all user story implementations, verify:
 4. The browser will prompt to save the credential (accept it)
 5. Test: send a message in a conversation — reply should arrive within ~5 seconds
 
-**Supported models** (set in Settings):
-- `anthropic/claude-3.5-sonnet` — recommended; strong Chinese language support
-- `openai/gpt-4o` — alternative
+**Supported models** (set per action in Settings):
+- `deepseek/deepseek-v3.2` — default for chat reply and grammar feedback
+- `openai/gpt-oss-120b` — default for word translation and phrase lookup
 - Any model string from [openrouter.ai/models](https://openrouter.ai/models)

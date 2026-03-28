@@ -28,7 +28,7 @@ Content-Type: application/json
 **Body**:
 ```json
 {
-  "model": "<user-selected model string>",
+  "model": "<settings.phraseLookupModel, default 'openai/gpt-oss-120b'>",
   "response_format": {
     "type": "json_schema",
     "json_schema": {
