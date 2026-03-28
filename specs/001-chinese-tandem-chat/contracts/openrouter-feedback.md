@@ -31,20 +31,9 @@ Content-Type: application/json
         "properties": {
           "is_correct": { "type": "boolean" },
           "translation": { "type": "string" },
-          "corrections": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "original":  { "type": "string" },
-                "corrected": { "type": "string" },
-                "position":  { "type": "integer" }
-              },
-              "required": ["original", "corrected", "position"]
-            }
-          }
+          "corrected": { "type": "string" }
         },
-        "required": ["is_correct", "translation", "corrections"]
+        "required": ["is_correct", "translation", "corrected"]
       }
     }
   },
@@ -74,7 +63,7 @@ history — to keep the feedback focused and cost-efficient.
   "choices": [
     {
       "message": {
-        "content": "{\"is_correct\":true,\"translation\":\"I am very happy.\",\"corrections\":[]}"
+        "content": "{\"is_correct\":true,\"translation\":\"I am very happy.\",\"corrected\":\"\"}"
       }
     }
   ]
@@ -87,11 +76,7 @@ history — to keep the feedback focused and cost-efficient.
 {
   is_correct: boolean          // true → green icon; false → red icon
   translation: string          // English translation of the user's original message
-  corrections: Array<{
-    original: string            // Wrong/missing segment (empty string = pure insertion)
-    corrected: string           // Correct replacement (empty string = pure deletion)
-    position: number            // Character offset in original message
-  }>
+  corrected: string            // Empty string when correct; corrected message otherwise
 }
 ```
 

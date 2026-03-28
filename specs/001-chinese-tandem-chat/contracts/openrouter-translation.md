@@ -44,10 +44,9 @@ Content-Type: application/json
                 "text":        { "type": "string" },
                 "pinyin":      { "type": "string" },
                 "translation": { "type": "string" },
-                "startIndex":  { "type": "integer" },
-                "endIndex":    { "type": "integer" }
+                "startIndex":  { "type": "integer" }
               },
-              "required": ["text", "pinyin", "translation", "startIndex", "endIndex"]
+              "required": ["text", "pinyin", "translation", "startIndex"]
             }
           }
         },
@@ -58,7 +57,7 @@ Content-Type: application/json
   "messages": [
     {
       "role": "system",
-      "content": "You are a Chinese language dictionary. For each Chinese word in the given text, return its pinyin (with tone marks) and English translation. Return JSON only. Include start and end character indices into the original text."
+      "content": "You are a Chinese language dictionary. For each Chinese word in the given text, return its pinyin (with tone marks) and English translation. Return JSON only. Include the start character index into the original text."
     },
     {
       "role": "user",
@@ -77,7 +76,7 @@ Content-Type: application/json
   "choices": [
     {
       "message": {
-        "content": "{\"words\":[{\"text\":\"你好\",\"pinyin\":\"nǐ hǎo\",\"translation\":\"hello\",\"startIndex\":0,\"endIndex\":2},{\"text\":\"世界\",\"pinyin\":\"shì jiè\",\"translation\":\"world\",\"startIndex\":2,\"endIndex\":4}]}"
+        "content": "{\"words\":[{\"text\":\"你好\",\"pinyin\":\"nǐ hǎo\",\"translation\":\"hello\",\"startIndex\":0},{\"text\":\"世界\",\"pinyin\":\"shì jiè\",\"translation\":\"world\",\"startIndex\":2}]}"
       }
     }
   ]

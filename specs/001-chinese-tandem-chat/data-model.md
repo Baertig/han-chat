@@ -16,7 +16,7 @@ Represents an AI conversation partner profile.
 ```typescript
 interface Persona {
   id: string                // UUID v4, generated at creation
-  name: string              // Display name; 1–50 chars, required
+  name: string              // Display name; >1 char, required
   systemPrompt: string      // Raw text passed verbatim to LLM system role; required
   avatarDataUri: string | null  // Resized image as data URI; null = use placeholder
   createdAt: string         // ISO 8601 datetime
@@ -24,7 +24,7 @@ interface Persona {
 ```
 
 **Validation rules**:
-- `name`: required, 1–50 characters
+- `name`: required, >1 characters
 - `systemPrompt`: required, 1–2000 characters
 - `avatarDataUri`: if provided, MUST be a `data:image/...;base64,...` string; MUST be ≤ 200 KB (enforced by client-side resize before storage)
 
@@ -107,20 +107,14 @@ Grammar feedback for a user-sent message. Embedded in `Message.feedback`.
 interface FeedbackResult {
   isCorrect: boolean            // true = green icon, false = red icon
   translation: string           // English translation of the user's original message
-  corrections: Correction[]     // Empty array when isCorrect === true
-}
-
-interface Correction {
-  original: string    // The wrong segment (may be empty string for pure insertions)
-  corrected: string   // The correct replacement (may be empty string for pure deletions)
-  position: number    // Character offset in the original message (for ordering)
+  corrected: string[]           // empty string when isCorrect is true otherwise the corrected message
 }
 ```
 
 **Notes**:
 - `translation` is always populated (used by both green and red feedback dialog)
-- `corrections` is empty `[]` for correct messages; non-empty for errors
-- The character-level diff shown in the UI is computed from `corrections` by the `diff` service at render time — not stored directly
+- `corrected` is empty `""` for correct messages; non-empty for errors
+- The character-level diff shown in the UI is computed from `corrected` and original message text by the `diff` service at render time — not stored directly
 
 ---
 
@@ -135,13 +129,12 @@ interface WordTranslation {
   pinyin: string      // Space-separated pinyin with tone marks (e.g., "nǐ hǎo")
   translation: string // English translation of the word in context
   startIndex: number  // Character offset in Message.content (for tap-target mapping)
-  endIndex: number    // Exclusive end offset
 }
 ```
 
 **Notes**:
 - Only Chinese-script segments are included; punctuation and spaces are omitted
-- `startIndex`/`endIndex` allow the UI to map a tapped `<span>` back to its translation without re-running the LLM call
+- `startIndex` allows the UI to map a tapped `<span>` back to its translation without re-running the LLM call
 
 ---
 
