@@ -14,9 +14,9 @@ Management API). Deployed as static files; no backend.
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.x (strict mode)
+**Language/Version**: TypeScript 6.x (strict mode)
 **Framework**: Vue 3.5+ with `<script setup>` Composition API
-**Build Tool**: Vite 6.x (static output, no SSR)
+**Build Tool**: Vite 8.x (static output, no SSR)
 **Primary Dependencies**:
 
 - `vue-router` 4 — client-side routing (Home / Chat / Settings / Persona screens)
@@ -144,8 +144,6 @@ tests/
     ├── us3-word-lookup.spec.ts
     ├── us4-phrase-lookup.spec.ts
     └── us5-message-feedback.spec.ts
-
-e2e/ → same as tests/e2e/ (Playwright default; can symlink or configure testDir)
 ```
 
 **Structure Decision**: Single Vue project at repository root. No backend directory.

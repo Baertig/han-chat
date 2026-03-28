@@ -4,9 +4,9 @@ Auto-generated from all feature plans. Last updated: 2026-03-28
 
 ## Active Technologies
 
-- TypeScript 5.x strict mode (001-chinese-tandem-chat)
+- TypeScript 6.x strict mode (001-chinese-tandem-chat)
 - Vue 3.5+ with `<script setup>` Composition API
-- Vite 6.x (static build output — no SSR)
+- Vite 8.x (static build output — no SSR)
 - Pinia 2 + pinia-plugin-persistedstate (localStorage)
 - Vue Router 4 (client-side routing)
 - OpenRouter `/v1/chat/completions` (OpenAI-compatible; all LLM calls)
