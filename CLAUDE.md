@@ -1,9 +1,8 @@
 # han-chat Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-03-28
+Auto-generated from all feature plans. Last updated: 2026-03-29
 
 ## Active Technologies
-
 - TypeScript 6.x strict mode (001-chinese-tandem-chat)
 - Vue 3.5+ with `<script setup>` Composition API
 - Vite 8.x (static build output — no SSR)
@@ -51,7 +50,7 @@ npm run lint            # ESLint
 - Vue 3 `<script setup>` only (no Options API)
 - Pinia stores use `defineStore` with setup syntax preferred
 - All async LLM calls via `src/services/openrouter.ts` — never call `fetch` directly from components
-- API key retrieved via `src/services/credentials.ts` — never read from localStorage
+- API key loaded once at app start into SettingsStore via Credential Management API — never read from localStorage
 
 ## TDD Rules (Constitution Mandate)
 
@@ -70,7 +69,7 @@ Per user message, 2 parallel independent calls fire:
 2. Grammar feedback (`openrouter.grammarFeedback`) → updates message.feedback
 
 After assistant message arrives, 1 sequential call fires:
-3. Word translation pre-fetch (`openrouter.translateMessage`) → populates message.wordTranslations
+3. Word translation pre-fetch (`openrouter.translateMessage`) → produces AnnotatedWord[] via matching algorithm
 
 On phrase drag release, 1 on-demand call fires:
 4. Phrase lookup (`openrouter.translatePhrase`) → shown in popup, not persisted
@@ -79,7 +78,7 @@ All calls use structured JSON output (response_format: json_schema) except chat 
 
 ## Recent Changes
 
-- 001-chinese-tandem-chat: Initial project setup — Vue 3 + Vite + TypeScript + OpenRouter
+- 001-chinese-tandem-chat: Updated plan — native Date types, Message type hierarchy (BaseMessage/UserMessage/PersonaMessage), AnnotatedWord matching algorithm, API key loaded once at startup
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->

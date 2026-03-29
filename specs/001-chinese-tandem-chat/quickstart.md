@@ -1,6 +1,6 @@
 # Quickstart: Chinese AI Tandem Chat
 
-**Branch**: `001-chinese-tandem-chat` | **Date**: 2026-03-28
+**Branch**: `001-chinese-tandem-chat` | **Date**: 2026-03-29
 
 Use this guide to bootstrap the project, run tests, and validate the app end-to-end.
 

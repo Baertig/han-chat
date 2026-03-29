@@ -1,6 +1,6 @@
 # Research: Chinese AI Tandem Chat
 
-**Branch**: `001-chinese-tandem-chat` | **Date**: 2026-03-28
+**Branch**: `001-chinese-tandem-chat` | **Date**: 2026-03-29
 
 All unknowns from Technical Context resolved. No NEEDS CLARIFICATION items remain.
 
@@ -80,26 +80,23 @@ feedbackPromise.then(fb => store.setMessageFeedback(messageId, fb))
 
 ## 4. API Key Storage: Credential Management API
 
-**Decision**: `navigator.credentials` (`PasswordCredential`) for store/retrieve. No fallback to localStorage. If API unavailable, inform user and block LLM calls.
+**Decision**: `navigator.credentials` (`PasswordCredential`) for store/retrieve. API key loaded **once at app startup** into the `settings` Pinia store. No fallback to localStorage. If API unavailable, inform user and block LLM calls.
 
-**Rationale**: Only browser-native method that integrates with the OS password manager and keeps the key out of plaintext storage. Required by FR-014 and the constitution's privacy principle.
+**Rationale**: Only browser-native method that integrates with the OS password manager and keeps the key out of plaintext storage. Required by FR-014 and the constitution's privacy principle. Loading once at startup avoids repeated async credential lookups on every LLM call and keeps the key available reactively via the store.
 
 **Browser support**: Chrome 51+, Firefox 60+, Safari 12+ — full support on all target browsers.
 
 **Pattern**:
 ```typescript
-// Store
+// Store (on Settings save)
 const cred = new PasswordCredential({ id: 'han-chat-openrouter', password: apiKey, name: 'OpenRouter API Key' })
 await navigator.credentials.store(cred)
 
-// Retrieve
+// Retrieve (once at app start, in settings store init())
 const cred = await navigator.credentials.get({ password: true, mediation: 'silent' })
 const apiKey = (cred as PasswordCredential)?.password ?? null
+// → stored in settings store reactive state (not localStorage)
 ```
-
-**Fallback**: If `window.PasswordCredential` is undefined, display a persistent banner:
-> "Secure credential storage is not available in your browser. API key cannot be stored."
-Do NOT fall back to localStorage silently (FR-014).
 
 ---
 
@@ -173,5 +170,5 @@ Do NOT fall back to localStorage silently (FR-014).
 | Diff algorithm | jsdiff `diffChars()` |
 | Unit test stack | Vitest + @testing-library/vue + happy-dom |
 | E2E test stack | Playwright + vite preview |
-| Word translation source | LLM structured JSON (pre-fetched on AI message arrival) |
+| Word translation source | LLM structured JSON (pre-fetched) → matched to text via AnnotatedWord algorithm |
 | Phrase translation source | LLM structured JSON (on-demand on drag release) |

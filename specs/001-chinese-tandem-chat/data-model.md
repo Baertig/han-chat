@@ -1,9 +1,10 @@
 # Data Model: Chinese AI Tandem Chat
 
-**Branch**: `001-chinese-tandem-chat` | **Date**: 2026-03-28
+**Branch**: `001-chinese-tandem-chat` | **Date**: 2026-03-29
 
 All entities are stored client-side in browser localStorage via Pinia stores.
-The API key is stored separately via the Credential Management API.
+The API key is stored via the Credential Management API and loaded once at app
+start.
 
 ---
 
@@ -19,7 +20,7 @@ interface Persona {
   name: string              // Display name; >1 char, required
   systemPrompt: string      // Raw text passed verbatim to LLM system role; required
   avatarDataUri: string | null  // Resized image as data URI; null = use placeholder
-  createdAt: string         // ISO 8601 datetime
+  createdAt: Date           // Native JS Date
 }
 ```
 
@@ -30,56 +31,67 @@ interface Persona {
 
 **Lifecycle**: Created by user; no deletion in v1; edited by updating fields in place.
 
+**Persistence note**: `createdAt` is serialised to ISO 8601 string by `pinia-plugin-persistedstate` and deserialised back to `Date` on hydration via a custom serialiser.
+
 ---
 
 ### Conversation
 
-A named chat session linking one Persona to an ordered list of Messages.
+A chat session linking one Persona to an ordered list of Messages.
 
 ```typescript
 interface Conversation {
   id: string            // UUID v4
-  personaId: string     // FK → Persona.id; set to null if persona deleted (orphaned)
-  createdAt: string     // ISO 8601 datetime
-  updatedAt: string     // ISO 8601; updated on each new message
+  personaId: string     // FK → Persona.id; orphaned if persona deleted
+  createdAt: Date       // Native JS Date
+  updatedAt: Date       // Native JS Date; updated on each new message
+  messages: Message[]   // list of messages in the conversation
 }
 ```
 
 **Validation rules**:
-- `personaId`: MUST reference an existing Persona id at creation time; may become orphaned (persona was deleted) — displayed with "Deleted persona" placeholder
+- `personaId`: MUST reference an existing Persona id at creation time; may become orphaned — displayed with "Deleted persona" placeholder
 
 **State transitions**:
-- `active` → ongoing while user is chatting (transient UI state, not persisted)
-- Conversations have no explicit status field; they are always open/resumable
+- Conversations are always resumable
 
 ---
 
-### Message
+### Message (type hierarchy)
 
-A single turn in a Conversation.
+Messages use a discriminated union based on `role`. A base type carries shared
+fields; `UserMessage` and `PersonaMessage` extend it with role-specific data.
 
 ```typescript
-interface Message {
+interface BaseMessage {
   id: string                      // UUID v4
   conversationId: string          // FK → Conversation.id
   role: 'user' | 'assistant'
   content: string                 // Raw text content
-  timestamp: string               // ISO 8601 datetime
-  // Only present on role === 'user' messages:
-  feedback: FeedbackResult | null  // null while pending; populated when call resolves
-  feedbackStatus: 'pending' | 'resolved' | 'error' | null  // null for assistant messages
-  // Only present on role === 'assistant' messages:
-  wordTranslations: WordTranslation[] | null  // null while pre-fetch pending
-  wordTranslationStatus: 'pending' | 'resolved' | 'error' | null  // null for user messages
+  timestamp: Date                 // Native JS Date
 }
+
+interface UserMessage extends BaseMessage {
+  role: 'user'
+  feedback: FeedbackResult | null  // null while pending; populated when call resolves
+  feedbackStatus: 'pending' | 'resolved' | 'error' | null  // null before send completes
+}
+
+interface PersonaMessage extends BaseMessage {
+  role: 'assistant'
+  renderTokens: AnnotatedWord[] | null  // null while translation pending
+  wordTranslationStatus: 'pending' | 'resolved' | 'error' | null
+}
+
+type Message = UserMessage | PersonaMessage
 ```
 
 **Validation rules**:
 - `content`: required, non-empty string
 - `role`: must be `'user'` or `'assistant'`
-- `feedback` and `feedbackStatus` are mutually exclusive with `wordTranslations` / `wordTranslationStatus` per role
+- Type guard: `message.role === 'user'` narrows to `UserMessage`; `message.role === 'assistant'` narrows to `PersonaMessage`
 
-**State transitions (user message)**:
+**State transitions (UserMessage)**:
 
 ```
 SENT
@@ -88,26 +100,26 @@ SENT
   │     └── [feedback call fails]    → feedbackStatus: 'error', feedback: null
 ```
 
-**State transitions (assistant message)**:
+**State transitions (PersonaMessage)**:
 
 ```
 RECEIVED
   ├── wordTranslationStatus: 'pending'
-  │     ├── [translation call resolves] → wordTranslationStatus: 'resolved', wordTranslations: [...]
-  │     └── [translation call fails]    → wordTranslationStatus: 'error', wordTranslations: null
+  │     ├── [translation call resolves] → wordTranslationStatus: 'resolved', renderTokens: AnnotatedWord[]
+  │     └── [translation call fails]    → wordTranslationStatus: 'error', renderTokens: null
 ```
 
 ---
 
 ### FeedbackResult
 
-Grammar feedback for a user-sent message. Embedded in `Message.feedback`.
+Grammar feedback for a user-sent message. Embedded in `UserMessage.feedback`.
 
 ```typescript
 interface FeedbackResult {
   isCorrect: boolean            // true = green icon, false = red icon
   translation: string           // English translation of the user's original message
-  corrected: string           // empty string when isCorrect is true otherwise the corrected message
+  corrected: string             // empty string when isCorrect is true; corrected message otherwise
 }
 ```
 
@@ -120,21 +132,96 @@ interface FeedbackResult {
 
 ### WordTranslation
 
-Per-word pinyin and translation for a single Chinese word in an assistant message.
-Stored as an array embedded in `Message.wordTranslations`.
+Raw translation result returned by the LLM for a single Chinese word.
+This is the intermediate format before matching to the actual message text.
 
 ```typescript
 interface WordTranslation {
-  text: string        // The original Chinese word/segment (as segmented by Intl.Segmenter)
-  pinyin: string      // Space-separated pinyin with tone marks (e.g., "nǐ hǎo")
-  translation: string // English translation of the word in context
-  startIndex: number  // Character offset in Message.content (for tap-target mapping)
+  word: string          // The Chinese word as identified by the LLM
+  pinyin: string        // Tone-marked pinyin (e.g., "nǐ hǎo")
+  translation: string   // English translation of the word in context
 }
 ```
 
 **Notes**:
-- Only Chinese-script segments are included; punctuation and spaces are omitted
-- `startIndex` allows the UI to map a tapped `<span>` back to its translation without re-running the LLM call
+- No `startIndex` field — LLMs are unreliable at counting character positions
+- The `word` field from the LLM is matched to the actual message text using the AnnotatedWord algorithm (see below)
+
+---
+
+### AnnotatedWord
+
+The final per-character/word unit used to render assistant messages with
+inline translation popups. Produced by the matching algorithm that aligns
+LLM-returned `WordTranslation[]` to the actual message text.
+
+```typescript
+interface AnnotatedWord {
+  word: string              // The text segment (Chinese word, punctuation, or single char)
+  pinyin: string | null    // Pinyin if translated; null if punctuation/unmatched
+  translation: string | null  // English translation if translated; null if punctuation/unmatched
+}
+```
+
+**Matching algorithm** (run client-side after translation call resolves):
+
+```typescript
+function matchTranslationsToText(
+  text: string,
+  tokens: WordTranslation[]
+): AnnotatedWord[] {
+  const queue = [...tokens]  // mutable copy
+  const renderTokens: AnnotatedWord[] = []
+
+  for (let i = 0; i < text.length; ) {
+    const firstWord = queue.at(0)?.word
+    const firstLength = firstWord ? firstWord.length : 1
+    const firstCandidate = text.substring(i, i + firstLength)
+
+    const secondWord = queue.at(1)?.word
+    const secondLength = secondWord ? secondWord.length : 1
+    const secondCandidate = text.substring(i, i + secondLength)
+
+    if (isPunctuation(firstCandidate)) {
+      // Punctuation: skip in translation queue if it matches
+      if (firstWord === firstCandidate) {
+        queue.shift()
+      } else if (firstWord && firstWord.startsWith(firstCandidate)) {
+        queue[0] = { ...queue[0], word: firstWord.replace(firstCandidate, '') }
+      }
+      renderTokens.push({ word: firstCandidate, pinyin: false, translation: false })
+      i += 1
+    } else if (firstCandidate === firstWord) {
+      // Exact match with first queued translation
+      const token = queue.shift()!
+      renderTokens.push({
+        word: token.word,
+        pinyin: token.pinyin,
+        translation: token.translation,
+      })
+      i += firstCandidate.length
+    } else if (secondCandidate === secondWord) {
+      // Skip a mismatched first token; match second (handles LLM double-words)
+      queue.shift()
+      const token = queue.shift()!
+      renderTokens.push({
+        word: token.word,
+        pinyin: token.pinyin,
+        translation: token.translation,
+      })
+      i += secondCandidate.length
+    } else {
+      // Unmatched character: render without translation
+      renderTokens.push({ word: text[i], pinyin: false, translation: false })
+      i += 1
+    }
+  }
+
+  return renderTokens
+}
+```
+
+**`isPunctuation` helper**: Returns true for CJK punctuation and standard ASCII punctuation characters (spaces, commas, periods, etc.).
 
 ---
 
@@ -145,16 +232,24 @@ Device-level configuration. Not tied to any user identity.
 ```typescript
 interface AppSettings {
   contextWindowSize: number  // Default: 8; range: 1–50; user-configurable
-  chatModel: string          // Default: 'deepseek/deepseek-v3.2'; model for chat reply calls
-  feedbackModel: string      // Default: 'deepseek/deepseek-v3.2'; model for grammar feedback calls
-  translationModel: string   // Default: 'openai/gpt-oss-120b'; model for word translation calls
-  phraseLookupModel: string  // Default: 'openai/gpt-oss-120b'; model for phrase lookup calls
-  // Note: API key is NOT stored here — it lives in the Credential Management API
+  chatModel: string          // Default: 'deepseek/deepseek-v3.2'
+  feedbackModel: string      // Default: 'deepseek/deepseek-v3.2'
+  translationModel: string   // Default: 'openai/gpt-oss-120b'
+  phraseLookupModel: string  // Default: 'openai/gpt-oss-120b'
+  apiKey: string | null       // Loaded once at app start from Credential Management API
 }
 ```
 
-**Persistence**: `contextWindowSize` and all model strings → localStorage via `settings` Pinia store.
-**API key**: Retrieved at runtime via `navigator.credentials.get()`; never stored in AppSettings.
+**Persistence**:
+- `contextWindowSize` and all model strings → localStorage via `settings` Pinia store
+- `apiKey` → **NOT persisted to localStorage**. Loaded once at app startup from Credential Management API into the store's reactive state. Written back to Credential Management API when changed in Settings.
+
+**API key loading flow**:
+1. App mounts → `settings` store `init()` action fires
+2. `init()` calls `navigator.credentials.get({ password: true, mediation: 'silent' })`
+3. If credential found → `apiKey` set in store state (reactive, in-memory only)
+4. If not found → `apiKey` remains `null`; user is redirected to Settings on first LLM call attempt, and a toast message from the bottom is shown indicating what he needs to do. 
+5. All services read `apiKey` from the `settings` store — never call Credential API directly
 
 ---
 
@@ -162,9 +257,9 @@ interface AppSettings {
 
 ```
 Persona 1──* Conversation
-Conversation 1──* Message
-Message 0..1──1 FeedbackResult    (user messages only)
-Message 0..*──1 WordTranslation[] (assistant messages only)
+Conversation 1──* Message (UserMessage | PersonaMessage)
+UserMessage 0..1──1 FeedbackResult
+PersonaMessage 0..*──1 AnnotatedWord[]  (matched from WordTranslation[])
 ```
 
 ---
@@ -176,10 +271,31 @@ Message 0..*──1 WordTranslation[] (assistant messages only)
 | `han-chat-personas` | Serialised `Persona[]` |
 | `han-chat-conversations` | Serialised `Conversation[]` |
 | `han-chat-messages` | Serialised `Message[]` (all conversations) |
-| `han-chat-settings` | Serialised `AppSettings` |
+| `han-chat-settings` | Serialised `AppSettings` (excluding `apiKey`) |
 
-**Note**: The `conversations` store includes messages to keep related data colocated.
-If message volume grows, messages can be split to a separate key per conversation id.
+**Date serialisation**: All `Date` fields are serialised to ISO 8601 strings by
+`pinia-plugin-persistedstate` and deserialised back to `Date` objects on store
+hydration. This is handled by a custom `serializer` option on each store:
+
+```typescript
+{
+  persist: {
+    serializer: {
+      serialize: JSON.stringify,
+      deserialize: (value: string) => {
+        return JSON.parse(value, (key, val) => {
+          if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(val)) {
+            return new Date(val)
+          }
+          return val
+        })
+      }
+    }
+  }
+}
+```
+
+**Note**: `apiKey` is excluded from localStorage persistence via the `paths` option on the settings store.
 
 ---
 

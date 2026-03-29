@@ -10,7 +10,9 @@
 ## Purpose
 
 Pre-fetches pinyin and English translation for every Chinese word in an assistant
-message so that word-tap popups (US3) are instant (no per-tap network call).
+message. The raw `WordTranslation[]` result is then matched to the actual message
+text by the `matchTranslationsToText()` algorithm (see data-model.md) to produce
+`AnnotatedWord[]`, enabling instant word-tap popups (US3) with no per-tap network call.
 
 ---
 
@@ -41,12 +43,11 @@ Content-Type: application/json
             "items": {
               "type": "object",
               "properties": {
-                "text":        { "type": "string" },
+                "word":        { "type": "string" },
                 "pinyin":      { "type": "string" },
-                "translation": { "type": "string" },
-                "startIndex":  { "type": "integer" }
+                "translation": { "type": "string" }
               },
-              "required": ["text", "pinyin", "translation", "startIndex"]
+              "required": ["word", "pinyin", "translation"]
             }
           }
         },
@@ -57,15 +58,21 @@ Content-Type: application/json
   "messages": [
     {
       "role": "system",
-      "content": "You are a Chinese language dictionary. For each Chinese word in the given text, return its pinyin (with tone marks) and English translation. Return JSON only. Include the start character index into the original text."
+      "content": "You are a Chinese language translation assistant. Split the given Chinese text into individual words and provide pinyin and English translation for each word. Preserve the exact order"
     },
     {
       "role": "user",
-      "content": "<assistant message text>"
+      "content": "Please translate this Chinese text and provide pinyin and translation for each word: \"<assistant message text>\""
     }
   ]
 }
 ```
+
+**Key changes from prior version**:
+- `startIndex` removed from schema — LLMs are unreliable at counting character positions
+- Field renamed from `text` to `word` to match the `WordTranslation` interface
+- System prompt updated to focus on word splitting + preserving order
+- User prompt explicitly asks for per-word pinyin and translation
 
 ---
 
@@ -76,14 +83,30 @@ Content-Type: application/json
   "choices": [
     {
       "message": {
-        "content": "{\"words\":[{\"text\":\"你好\",\"pinyin\":\"nǐ hǎo\",\"translation\":\"hello\",\"startIndex\":0},{\"text\":\"世界\",\"pinyin\":\"shì jiè\",\"translation\":\"world\",\"startIndex\":2}]}"
+        "content": "{\"words\":[{\"word\":\"你好\",\"pinyin\":\"nǐ hǎo\",\"translation\":\"hello\"},{\"word\":\"世界\",\"pinyin\":\"shì jiè\",\"translation\":\"world\"}]}"
       }
     }
   ]
 }
 ```
 
-**Parsed payload** maps to `WordTranslation[]` stored on `Message.wordTranslations`.
+**Parsed payload** maps to `WordTranslation[]`. This is then fed into
+`matchTranslationsToText(messageContent, words)` to produce the final
+`AnnotatedWord[]` stored on `PersonaMessage.renderTokens`.
+
+---
+
+## Post-Processing: Translation-to-Text Matching
+
+After the LLM returns `WordTranslation[]`, the service layer runs the matching
+algorithm to align translations with the actual message characters:
+
+1. Parse LLM response → `WordTranslation[]`
+2. Call `matchTranslationsToText(message.content, wordTranslations)` → `AnnotatedWord[]`
+3. Store `AnnotatedWord[]` on `PersonaMessage.renderTokens`
+4. Set `wordTranslationStatus: 'resolved'`
+
+See `data-model.md` → AnnotatedWord section for the full matching algorithm.
 
 ---
 
@@ -92,7 +115,7 @@ Content-Type: application/json
 - Assistant message is displayed immediately when chat reply resolves
 - Word `<span>` elements are rendered but have no tap handler yet
 - A subtle shimmer/loading indicator is shown on the message
-- Once this call resolves, tap handlers are activated
+- Once this call resolves and matching completes, tap handlers are activated
 
 ---
 
