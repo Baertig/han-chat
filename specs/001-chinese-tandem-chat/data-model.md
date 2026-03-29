@@ -79,7 +79,7 @@ interface UserMessage extends BaseMessage {
 
 interface PersonaMessage extends BaseMessage {
   role: 'assistant'
-  renderTokens: AnnotatedWord[] | null  // null while translation pending
+  annotatedWords: AnnotatedWord[] | null  // null while translation pending
   wordTranslationStatus: 'pending' | 'resolved' | 'error' | null
 }
 
@@ -105,8 +105,8 @@ SENT
 ```
 RECEIVED
   ├── wordTranslationStatus: 'pending'
-  │     ├── [translation call resolves] → wordTranslationStatus: 'resolved', renderTokens: AnnotatedWord[]
-  │     └── [translation call fails]    → wordTranslationStatus: 'error', renderTokens: null
+  │     ├── [translation call resolves] → wordTranslationStatus: 'resolved', annotatedWords: AnnotatedWord[]
+  │     └── [translation call fails]    → wordTranslationStatus: 'error', annotatedWords: null
 ```
 
 ---
@@ -171,7 +171,7 @@ function matchTranslationsToText(
   tokens: WordTranslation[]
 ): AnnotatedWord[] {
   const queue = [...tokens]  // mutable copy
-  const renderTokens: AnnotatedWord[] = []
+  const annotatedWords: AnnotatedWord[] = []
 
   for (let i = 0; i < text.length; ) {
     const firstWord = queue.at(0)?.word
@@ -189,12 +189,12 @@ function matchTranslationsToText(
       } else if (firstWord && firstWord.startsWith(firstCandidate)) {
         queue[0] = { ...queue[0], word: firstWord.replace(firstCandidate, '') }
       }
-      renderTokens.push({ word: firstCandidate, pinyin: false, translation: false })
+      annotatedWords.push({ word: firstCandidate, pinyin: false, translation: false })
       i += 1
     } else if (firstCandidate === firstWord) {
       // Exact match with first queued translation
       const token = queue.shift()!
-      renderTokens.push({
+      annotatedWords.push({
         word: token.word,
         pinyin: token.pinyin,
         translation: token.translation,
@@ -204,7 +204,7 @@ function matchTranslationsToText(
       // Skip a mismatched first token; match second (handles LLM double-words)
       queue.shift()
       const token = queue.shift()!
-      renderTokens.push({
+      annotatedWords.push({
         word: token.word,
         pinyin: token.pinyin,
         translation: token.translation,
@@ -212,12 +212,12 @@ function matchTranslationsToText(
       i += secondCandidate.length
     } else {
       // Unmatched character: render without translation
-      renderTokens.push({ word: text[i], pinyin: false, translation: false })
+      annotatedWords.push({ word: text[i], pinyin: false, translation: false })
       i += 1
     }
   }
 
-  return renderTokens
+  return annotatedWords
 }
 ```
 
@@ -269,8 +269,7 @@ PersonaMessage 0..*──1 AnnotatedWord[]  (matched from WordTranslation[])
 | Key | Contents |
 |-----|----------|
 | `han-chat-personas` | Serialised `Persona[]` |
-| `han-chat-conversations` | Serialised `Conversation[]` |
-| `han-chat-messages` | Serialised `Message[]` (all conversations) |
+| `han-chat-conversations` | Serialised `Conversation[]` (each embedding `Message[]`) |
 | `han-chat-settings` | Serialised `AppSettings` (excluding `apiKey`) |
 
 **Date serialisation**: All `Date` fields are serialised to ISO 8601 strings by

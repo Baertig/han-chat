@@ -250,11 +250,19 @@ with a diff dialog showing the correction.
   text passed as context to the LLM), and an optional profile image stored locally.
 - **Conversation**: A named session linking one Persona to an ordered list of
   Messages. Carries creation and last-activity timestamps.
-- **Message**: A single turn in a Conversation. Has a role (user or assistant), text
-  content, a timestamp, and — for user messages — an optional FeedbackResult.
-- **FeedbackResult**: Associated with a user Message. Contains a correctness flag, an
-  English translation of the user's original text, and an optional structured diff
-  between the original and the corrected version.
+- **Message**: A single turn in a Conversation. Uses a discriminated union based
+  on role: **UserMessage** carries an optional FeedbackResult and feedback status;
+  **PersonaMessage** carries an optional array of AnnotatedWord (per-word pinyin
+  and translation, matched from LLM output) and a translation status. Both share
+  a base with id, conversationId, role, content, and a timestamp (native Date).
+- **FeedbackResult**: Associated with a UserMessage. Contains a correctness flag,
+  an English translation of the user's original text, and the corrected version
+  of the text (empty string when correct). The character-level diff is computed
+  at render time by the diff service — not stored in FeedbackResult.
+- **AnnotatedWord**: A single word or character segment in a PersonaMessage,
+  enriched with pinyin and English translation (or null for punctuation /
+  unmatched characters). Produced by matching LLM-returned WordTranslation
+  results to the actual message text via a client-side algorithm.
 - **AppSettings**: Device-level configuration. Includes the LLM API key (stored via
   Credential Management API), the context window size N (stored in local storage,
   default 8), and per-action LLM model strings for chat reply, grammar feedback,

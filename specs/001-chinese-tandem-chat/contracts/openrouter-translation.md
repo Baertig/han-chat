@@ -92,7 +92,7 @@ Content-Type: application/json
 
 **Parsed payload** maps to `WordTranslation[]`. This is then fed into
 `matchTranslationsToText(messageContent, words)` to produce the final
-`AnnotatedWord[]` stored on `PersonaMessage.renderTokens`.
+`AnnotatedWord[]` stored on `PersonaMessage.annotatedWords`.
 
 ---
 
@@ -103,7 +103,7 @@ algorithm to align translations with the actual message characters:
 
 1. Parse LLM response → `WordTranslation[]`
 2. Call `matchTranslationsToText(message.content, wordTranslations)` → `AnnotatedWord[]`
-3. Store `AnnotatedWord[]` on `PersonaMessage.renderTokens`
+3. Store `AnnotatedWord[]` on `PersonaMessage.annotatedWords`
 4. Set `wordTranslationStatus: 'resolved'`
 
 See `data-model.md` → AnnotatedWord section for the full matching algorithm.
