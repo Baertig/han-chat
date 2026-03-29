@@ -98,8 +98,8 @@ the tapped word.
 3. **Given** a tapped word has no translation available (e.g., proper noun, number),
    **When** the lookup is attempted, **Then** the popup shows a "No translation found"
    message rather than failing silently.
-4. **Given** both user-sent and AI-sent messages, **When** either is tapped, **Then**
-   the word lookup works the same way for both.
+4. **Given** an AI-sent message, **When** any Chinese word in it is tapped, **Then**
+   the word lookup works. User-sent messages are not tappable for lookup.
 
 ---
 
@@ -208,10 +208,10 @@ with a diff dialog showing the correction.
   system prompt and a sliding window of the last N messages as context) and one for
   grammar feedback. The AI reply MUST be displayed as soon as the reply call resolves,
   independently of the feedback call. N defaults to 8 and is user-configurable.
-- **FR-007**: Every Chinese word or character in a chat message (sent or received)
+- **FR-007**: Every Chinese word or character in an assistant chat message
   MUST be tappable and trigger a pinyin and translation popup.
 - **FR-008**: Users MUST be able to press-and-drag over a span of Chinese text in any
-  message to trigger a pinyin and translation popup for the selected phrase.
+  assistant message to trigger a pinyin and translation popup for the selected phrase.
 - **FR-009**: The grammar feedback call (fired in parallel with FR-006) MUST resolve
   independently and attach a feedback icon to the sent message bubble — green when
   correct, red when errors are present — as soon as its result arrives. A loading
@@ -295,8 +295,6 @@ with a diff dialog showing the correction.
 - The context window size N (default 8) is user-configurable via the settings screen
   and stored in local storage. Only the last N messages are sent as history with each
   LLM call.
-- Pinyin and translation lookups are performed via a bundled dictionary or a
-  third-party dictionary API; the exact source is a planning-phase decision.
 - The primary target is a modern smartphone browser (mobile-first layout), though the
   app MUST also function on desktop browsers.
 - Chinese text is Simplified Chinese (Mandarin); Traditional Chinese and other

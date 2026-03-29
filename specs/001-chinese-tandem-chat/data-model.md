@@ -107,7 +107,7 @@ Grammar feedback for a user-sent message. Embedded in `Message.feedback`.
 interface FeedbackResult {
   isCorrect: boolean            // true = green icon, false = red icon
   translation: string           // English translation of the user's original message
-  corrected: string[]           // empty string when isCorrect is true otherwise the corrected message
+  corrected: string           // empty string when isCorrect is true otherwise the corrected message
 }
 ```
 
