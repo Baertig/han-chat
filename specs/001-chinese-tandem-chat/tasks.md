@@ -1,32 +1,33 @@
 # Tasks: Chinese AI Tandem Chat
 
 **Input**: Design documents from `/specs/001-chinese-tandem-chat/`
-**Prerequisites**: plan.md ✅, spec.md ✅, data-model.md ✅, contracts/ ✅, quickstart.md ✅
+**Prerequisites**: plan.md, spec.md, data-model.md, contracts/, research.md, quickstart.md
 
-**Tests**: Included — TDD is a constitution mandate for this project. Write failing tests before each implementation task.
+**Tests**: Required — TDD is a constitution mandate for this project. Write failing tests before each implementation task.
 
-**Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
+**Organization**: Tasks grouped by user story to enable independent implementation and testing.
 
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
-- **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
-- Include exact file paths in descriptions
+- **[Story]**: Which user story (US1–US5)
+- Exact file paths included in all descriptions
 
 ---
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-**Purpose**: Project initialization, tooling, and shared type definitions
+**Purpose**: Project scaffold, dependencies, config, shared type definitions
 
-- [X] T001 Scaffold Vue 3 + TypeScript project using `npm create vue@latest han-chat` (select TypeScript, Vue Router, Pinia, Vitest, Playwright, ESLint + Prettier)
-- [X] T002 Install additional dependencies: `pinia-plugin-persistedstate diff` and dev deps `@testing-library/vue @testing-library/jest-dom @testing-library/user-event happy-dom`
-- [X] T003 [P] Configure `vitest.config.ts` with happy-dom environment, globals, setupFiles pointing to `tests/unit/setup.ts`, include pattern `tests/unit/**/*.{test,spec}.ts`
-- [X] T004 [P] Create `tests/unit/setup.ts` with `@testing-library/jest-dom` matchers and `cleanup()` afterEach
-- [X] T005 [P] Configure `playwright.config.ts` with `testDir: ./tests/e2e`, `baseURL: http://localhost:4173`, webServer using `npm run build && npm run preview` in CI, chromium and mobile-iphone projects
-- [X] T006 [P] Add `preview`, `test:unit`, `test:unit:run`, `test:e2e`, `test:e2e:ui` scripts to `package.json`
-- [X] T007 Create directory structure: `src/components/chat/`, `src/components/persona/`, `src/components/common/`, `src/views/`, `src/stores/`, `src/services/`, `src/router/`, `src/types/`, `tests/unit/services/`, `tests/unit/stores/`, `tests/e2e/`
-- [X] T008 [P] Define all shared TypeScript interfaces in `src/types/index.ts`: `Persona`, `Conversation`, `Message`, `FeedbackResult`, `WordTranslation`, `AppSettings` (including `chatModel`, `feedbackModel`, `translationModel`, `phraseLookupModel` strings)
+- [ ] T001 Verify project scaffold matches quickstart.md: package.json scripts, TypeScript strict mode, Vue 3 + Vite + Pinia + Vue Router + Vitest + Playwright
+- [ ] T002 Install additional dependencies: `pinia-plugin-persistedstate`, `diff`; devDeps: `@testing-library/vue`, `@testing-library/jest-dom`, `@testing-library/user-event`, `happy-dom`
+- [ ] T003 [P] Configure `vitest.config.ts` with happy-dom environment and setup file; create `tests/unit/setup.ts` with `@testing-library/jest-dom` matchers and `cleanup()` afterEach
+- [ ] T004 [P] Configure `playwright.config.ts` with `testDir: ./tests/e2e`, `baseURL: http://localhost:4173`, webServer using `npm run build && npm run preview` in CI, chromium and mobile-iphone projects
+- [ ] T005 [P] Create directory structure: `src/components/{chat,persona,common}/`, `src/views/`, `src/stores/`, `src/services/`, `src/router/`, `src/types/`, `tests/unit/{stores,services}/`, `tests/e2e/fixtures/`
+- [ ] T006 Define all TypeScript interfaces in `src/types/index.ts`: `Persona` (createdAt: Date), `Conversation` (createdAt/updatedAt: Date, messages: Message[]), `BaseMessage` (timestamp: Date), `UserMessage extends BaseMessage` (feedback, feedbackStatus), `PersonaMessage extends BaseMessage` (renderTokens: AnnotatedWord[] | null, wordTranslationStatus), `Message = UserMessage | PersonaMessage`, `FeedbackResult`, `WordTranslation` (word, pinyin, translation — no startIndex), `AnnotatedWord` (word, pinyin: string | null, translation: string | null), `AppSettings` (apiKey: string | null, contextWindowSize, 4 model strings)
+- [ ] T007 [P] Configure pinia-plugin-persistedstate in `src/main.ts` with custom Date deserialiser: JSON.parse reviver that converts ISO 8601 strings back to Date objects on store hydration
+- [ ] T008 [P] Create `src/App.vue` shell with `<RouterView>` and minimal layout
+- [ ] T009 [P] Create `tests/e2e/fixtures/openrouter.ts` — Playwright route fixture that intercepts `POST https://openrouter.ai/api/v1/chat/completions` and returns canned JSON responses per call type: chat reply, grammar feedback (structured JSON), word translation (structured JSON `words` array without startIndex), phrase lookup; export helper `mockOpenRouter(page, overrides?)`
 
 ---
 
@@ -34,159 +35,201 @@
 
 **Purpose**: Core services and stores that ALL user stories depend on
 
-**⚠️ CRITICAL**: No user story work can begin until this phase is complete
+**CRITICAL**: No user story work can begin until this phase is complete
 
-- [X] T009 Write failing unit tests for `credentials.ts` (store/retrieve API key, unavailable API fallback) in `tests/unit/services/credentials.test.ts`
-- [X] T010 Implement `src/services/credentials.ts` with `saveApiKey(key: string)`, `getApiKey(): Promise<string | null>`, and `isCredentialApiAvailable(): boolean` using `navigator.credentials` PasswordCredential; throw if API unavailable
-- [X] T011 Write failing unit tests for `openrouter.ts` (request shape, auth header, error paths for each of the 4 call types) in `tests/unit/services/openrouter.test.ts`
-- [X] T012 Implement `src/services/openrouter.ts` with `chatReply()`, `grammarFeedback()`, `translateMessage()`, `translatePhrase()` — each accepts a `model: string` parameter (sourced from the corresponding `settings` store field); all call `POST https://openrouter.ai/api/v1/chat/completions`; structured JSON output for feedback/translation/phrase calls; throw typed errors on 4xx/5xx/network failure
-- [X] T013 Write failing unit tests for `segmenter.ts` (tokenises Chinese text, skips punctuation) in `tests/unit/services/segmenter.test.ts`
-- [X] T014 [P] Implement `src/services/segmenter.ts` using `Intl.Segmenter('zh', { granularity: 'word' })` to return array of `{ text, startIndex }` for Chinese-script segments only
-- [X] T015 Write failing unit tests for `diff.ts` (char-level diff returns correct/incorrect/added segments) in `tests/unit/services/diff.test.ts`
-- [X] T016 [P] Implement `src/services/diff.ts` wrapping `jsdiff diffChars()` to return `{ type: 'equal' | 'removed' | 'added', value: string }[]`
-- [X] T017 Write failing unit tests for `personas` store (CRUD — `addPersona()`, `updatePersona()` — persistence key `han-chat-personas`, verify updated fields are persisted) in `tests/unit/stores/personas.test.ts`
-- [X] T018 Implement `src/stores/personas.ts` as Pinia setup store with `personas: Persona[]`, `addPersona()`, `updatePersona()`, persisted to localStorage key `han-chat-personas` via pinia-plugin-persistedstate
-- [X] T019 Write failing unit tests for `conversations` store (add conversation, add message, update message feedback/wordTranslations, orphaned-conversation lookup when `personaId` references a missing persona, persistence key `han-chat-conversations`) in `tests/unit/stores/conversations.test.ts`
-- [X] T020 Implement `src/stores/conversations.ts` as Pinia setup store with `conversations: Conversation[]` (embedding messages), `addConversation()`, `addMessage()`, `updateMessageFeedback()`, `updateMessageWordTranslations()`, persisted to `han-chat-conversations`
-- [X] T021 Write failing unit tests for `settings` store (contextWindowSize default 8 range 1–50, per-action model strings — `chatModel` and `feedbackModel` default `deepseek/deepseek-v3.2`, `translationModel` and `phraseLookupModel` default `openai/gpt-oss-120b` — persistence key `han-chat-settings`) in `tests/unit/stores/settings.test.ts`
-- [X] T022 [P] Implement `src/stores/settings.ts` as Pinia setup store with `contextWindowSize: number` (default 8), `chatModel` and `feedbackModel` (default `'deepseek/deepseek-v3.2'`), `translationModel` and `phraseLookupModel` (default `'openai/gpt-oss-120b'`), persisted to `han-chat-settings`
-- [X] T023 Configure `src/main.ts` to register Pinia with `pinia-plugin-persistedstate`, register Vue Router, and mount `App.vue`
-- [X] T024 Create `src/router/index.ts` with routes: `/` → `HomeView`, `/chat/:id` → `ChatView`, `/personas` → `PersonaListView`, `/settings` → `SettingsView`
-- [X] T024a [P] Create `tests/e2e/fixtures/openrouter.ts` — Playwright route fixture that intercepts `POST https://openrouter.ai/api/v1/chat/completions` and returns canned JSON responses per call type: chat reply (plain text assistant message), grammar feedback (structured JSON with `is_correct`, `translation`, `corrected`), word translation (structured JSON `words` array), phrase lookup (structured JSON `phrase`, `pinyin`, `translation`); export helper `mockOpenRouter(page, overrides?)` for use in all E2E spec files
+### Tests for Foundational Phase
 
-**Checkpoint**: Foundation ready — all stores, services, and routing are in place; user story implementation can now begin
+> **Write FIRST, ensure they FAIL before implementation**
+
+- [ ] T010 [P] Unit test for credentials service in `tests/unit/services/credentials.test.ts`: test `loadApiKey()` returns key from mocked PasswordCredential, returns null when unavailable, `saveApiKey()` stores credential, `isCredentialApiAvailable()` returns boolean
+- [ ] T011 [P] Unit test for settings store in `tests/unit/stores/settings.test.ts`: test `init()` loads API key via credentials service into reactive state, `apiKey` excluded from localStorage persistence, default values for contextWindowSize (8) and model strings (deepseek/deepseek-v3.2 for chat/feedback, openai/gpt-oss-120b for translation/phrase), Date deserialisation on hydration
+- [ ] T012 [P] Unit test for openrouter base service in `tests/unit/services/openrouter.test.ts`: test `chatReply()` reads apiKey from settings store, sends correct payload per `openrouter-chat.md` contract with sliding window of last N messages, handles errors (network, 4xx, 5xx, empty choices)
+- [ ] T013 [P] Unit test for personas store in `tests/unit/stores/personas.test.ts`: test `addPersona()` generates UUID + Date, `getById()`, persistence to localStorage key `han-chat-personas`, Date hydration (createdAt revived as Date)
+- [ ] T014 [P] Unit test for conversations store in `tests/unit/stores/conversations.test.ts`: test `createConversation()` generates UUID + Date, `addMessage()` appends to `conversation.messages[]` and updates `updatedAt`, `getConversation()`, Date hydration (createdAt/updatedAt/timestamp revived as Date), persistence to `han-chat-conversations`
+- [ ] T015 [P] Unit test for router in `tests/unit/router/router.test.ts`: test routes exist for `/`, `/chat/:id`, `/personas`, `/personas/new`, `/settings`
+
+### Implementation for Foundational Phase
+
+- [ ] T016 [P] Implement credentials service in `src/services/credentials.ts`: `loadApiKey(): Promise<string | null>`, `saveApiKey(key: string): Promise<void>`, `isCredentialApiAvailable(): boolean` — wrapping PasswordCredential API
+- [ ] T017 [P] Implement personas store in `src/stores/personas.ts`: `defineStore` setup syntax, `personas: Persona[]`, `addPersona()` (generates id via crypto.randomUUID(), createdAt via new Date()), `getById()`, persist to `han-chat-personas` with Date serialiser
+- [ ] T018 Implement settings store in `src/stores/settings.ts`: `defineStore` setup syntax, `apiKey: string | null` (in-memory only, excluded from persist paths), `contextWindowSize` (default 8), 4 model strings, `init()` action calling `loadApiKey()` from credentials service, persist to `han-chat-settings` with `paths` excluding `apiKey`
+- [ ] T019 Implement conversations store in `src/stores/conversations.ts`: `defineStore` setup syntax, `conversations: Conversation[]` (each embedding `messages: Message[]`), `createConversation(personaId)`, `addMessage(conversationId, message)` — updates `conversation.updatedAt`, `getConversation(id)`, `allConversationsSorted` computed (by updatedAt desc), `updateMessageFeedback()`, `updateMessageTranslations()`, persist to `han-chat-conversations` with Date serialiser
+- [ ] T020 Implement openrouter base service in `src/services/openrouter.ts`: shared `callOpenRouter()` helper reading `apiKey` from settings store (never calling Credential API directly), error handling for network/4xx/5xx, `chatReply()` per `openrouter-chat.md` contract with sliding window of `settings.contextWindowSize` messages
+- [ ] T021 Implement Vue Router in `src/router/index.ts`: routes for `/` (HomeView), `/chat/:id` (ChatView), `/personas` (PersonaListView), `/personas/new` (PersonaForm), `/settings` (SettingsView)
+
+**Checkpoint**: Foundation ready — stores persist with Date hydration, API key loaded at startup, openrouter service reads key from store, routes defined
 
 ---
 
-## Phase 3: User Story 1 — Persona Selection and Conversation Start (Priority: P1) 🎯 MVP
+## Phase 3: User Story 1 — Persona Selection and Conversation Start (Priority: P1) MVP
 
-**Goal**: Home screen with conversation list, persona picker, chat screen with send/receive messages, conversation persistence
+**Goal**: Home screen lists conversations; user picks a persona to start a new conversation; chat screen shows messages and receives AI replies via OpenRouter
 
-**Independent Test**: Open app with no data → create persona → start conversation → send one message → receive AI reply; verify full happy path works with no other features enabled
+**Independent Test**: Open app with no data → see empty state → create persona (inline for MVP) → start conversation → send message → receive AI reply
 
-### E2E Tests for User Story 1 ⚠️ Write FIRST — must FAIL before implementation
+### E2E Tests for User Story 1
 
-- [X] T025 [US1] Write E2E test: first-open shows empty conversations list with "New conversation" and "New persona" buttons in `tests/e2e/us1-conversation-start.spec.ts`
-- [X] T026 [US1] Write E2E test: tapping "New conversation" with no personas shows persona picker; creating first persona and confirming opens chat screen in `tests/e2e/us1-conversation-start.spec.ts`
-- [X] T027 [US1] Write E2E test: sending a message in chat displays it and returns AI reply; use `mockOpenRouter(page)` from `tests/e2e/fixtures/openrouter.ts` to intercept the OpenRouter API call — no real network call is made in `tests/e2e/us1-conversation-start.spec.ts`
-- [X] T028 [US1] Write E2E test: past conversations appear on home screen with persona name, last message preview, timestamp; tapping resumes full chat history in `tests/e2e/us1-conversation-start.spec.ts`
+> **Write FIRST. Must FAIL before implementation begins.**
+
+- [ ] T022 [US1] E2E test in `tests/e2e/us1-conversation-start.spec.ts`: AS1 — empty state shows empty list + "New conversation" + "New persona" buttons; AS2 — tap "New conversation" shows persona picker; AS3 — select persona opens chat with name visible; AS4 — send message and receive AI reply (mock OpenRouter via `mockOpenRouter(page)`); AS5 — home screen lists conversations with persona name, preview, timestamp; AS6 — tap conversation restores chat history
+
+### Unit Tests for User Story 1
+
+- [ ] T023 [P] [US1] Unit test for HomeView in `tests/unit/views/HomeView.test.ts`: renders empty state, renders conversation list sorted by updatedAt, navigation to chat on click
+- [ ] T024 [P] [US1] Unit test for ChatView message send flow in `tests/unit/views/ChatView.test.ts`: sends user message (UserMessage with feedbackStatus null), calls `chatReply()`, appends PersonaMessage (with wordTranslationStatus null), displays both messages
+- [ ] T025 [P] [US1] Unit test for ChatInput in `tests/unit/components/chat/ChatInput.test.ts`: emits `send` event with text, clears input after send, disabled when empty
+- [ ] T026 [P] [US1] Unit test for ChatMessage in `tests/unit/components/chat/ChatMessage.test.ts`: renders user message (right-aligned), renders assistant message (left-aligned), shows persona name
+- [ ] T027 [P] [US1] Unit test for PersonaPicker in `tests/unit/components/persona/PersonaPicker.test.ts`: lists all personas, emits selection event with personaId
+- [ ] T028 [P] [US1] Unit test for AvatarPlaceholder in `tests/unit/components/common/AvatarPlaceholder.test.ts`: renders initials when no avatarDataUri, renders `<img>` when provided
 
 ### Implementation for User Story 1
 
-- [X] T029 [P] [US1] Implement `src/components/common/AvatarPlaceholder.vue` — shows generated initials-based avatar when no `avatarDataUri` is set; accepts `name: string` prop
-- [X] T030 [P] [US1] Implement `src/components/persona/PersonaCard.vue` — displays persona avatar (or AvatarPlaceholder), name; emits `select` event; used in picker and list
-- [X] T031 [US1] Implement `src/components/persona/PersonaPicker.vue` — modal overlay listing all personas via `PersonaCard`; emits `picked(personaId)` and `cancel`; used by HomeView to start a new conversation
-- [X] T032 [US1] Implement `src/views/HomeView.vue` — fetches conversations from store ordered by `updatedAt` desc; shows empty state with "New conversation" and "New persona" buttons; shows conversation list (persona name, last message preview, timestamp); tapping a conversation navigates to `/chat/:id`; "New conversation" opens `PersonaPicker`; "New persona" navigates to `/personas`
-- [X] T033 [US1] Implement `src/components/chat/ChatInput.vue` — textarea + send button; emits `send(text: string)`; disables send when input is empty or when `disabled` prop is true; clears after send
-- [X] T034 [US1] Implement `src/components/chat/ChatMessage.vue` (US1 subset) — renders message bubble with role-based alignment and text content; no word segmentation or feedback icon yet (added in US3/US5)
-- [X] T035 [US1] Implement `src/views/ChatView.vue` — loads conversation + persona from stores; renders `ChatMessage` list; renders `ChatInput`; on send: adds user message to store, calls `openrouter.chatReply()` in parallel with `openrouter.grammarFeedback()`, adds assistant message when reply resolves; handles API key missing → redirect to `/settings` with explanatory message; handles network errors → inline retry error on message bubble
-- [X] T036 [US1] Create `src/App.vue` with `<RouterView>` and minimal navigation shell (back button, settings icon)
+- [ ] T029 [P] [US1] Implement AvatarPlaceholder in `src/components/common/AvatarPlaceholder.vue`: accepts `name` and `avatarDataUri` props, renders initials fallback or `<img>`
+- [ ] T030 [P] [US1] Implement ChatInput in `src/components/chat/ChatInput.vue`: text input with send button, emits `send` event, clears on send, disabled when empty
+- [ ] T031 [P] [US1] Implement ChatMessage (US1 subset) in `src/components/chat/ChatMessage.vue`: renders message bubble with content, timestamp, role-based alignment (user right, assistant left), avatar — no word spans or feedback icon yet
+- [ ] T032 [P] [US1] Implement PersonaCard in `src/components/persona/PersonaCard.vue`: displays persona avatar (or AvatarPlaceholder), name; emits `select`
+- [ ] T033 [US1] Implement PersonaPicker in `src/components/persona/PersonaPicker.vue`: modal overlay listing all personas via PersonaCard; emits `picked(personaId)` and `cancel`
+- [ ] T034 [US1] Implement HomeView in `src/views/HomeView.vue`: lists conversations (sorted by updatedAt desc) with persona name + last message preview + timestamp, "New conversation" button → PersonaPicker, "New persona" button → /personas/new, tap conversation → /chat/:id, empty state UI
+- [ ] T035 [US1] Implement ChatView in `src/views/ChatView.vue`: loads conversation by route param, renders message list with ChatMessage, ChatInput at bottom, on send: creates UserMessage (feedback: null, feedbackStatus: null) and adds to conversation.messages, calls `chatReply()` → creates PersonaMessage (renderTokens: null, wordTranslationStatus: null) and adds to conversation.messages, auto-scroll to bottom
+- [ ] T036 [US1] Add API key guard in ChatView: if `settingsStore.apiKey` is null when user tries to send, redirect to `/settings` with toast message explaining they need to set their API key
+- [ ] T037 [US1] Seed default persona on first run (if personas store is empty): name "Chinese Tutor", systemPrompt "You are a friendly Chinese language tutor. Respond in Simplified Chinese. Keep responses concise and conversational."
 
-**Checkpoint**: US1 complete — app is a functional chat with persona selection and conversation persistence
+**Checkpoint**: MVP complete — user can create conversations, send messages, receive AI replies, all persisted with Date objects across reloads
 
 ---
 
 ## Phase 4: User Story 2 — Persona Creation and Management (Priority: P2)
 
-**Goal**: Full persona creation form with name, system prompt, profile image upload and client-side resize; persona list management
+**Goal**: Full persona creation form with name, system prompt, and optional profile image upload with client-side resize
 
-**Independent Test**: From empty state — create persona with name, profile image, system prompt → verify in persona list → start conversation → confirm AI uses system prompt
+**Independent Test**: Create persona with name + image + prompt → verify in persona list → start conversation → AI uses system prompt
 
-### E2E Tests for User Story 2 ⚠️ Write FIRST — must FAIL before implementation
+### E2E Tests for User Story 2
 
-- [X] T037 [US2] Write E2E test: "New persona" form shows name, profile image, and system prompt fields; saving persists persona in list in `tests/e2e/us2-persona-creation.spec.ts`
-- [X] T038 [US2] Write E2E test: selecting a profile image shows cropped preview and persona is saved with avatar; persona without image shows AvatarPlaceholder in `tests/e2e/us2-persona-creation.spec.ts`
-- [X] T039 [US2] Write E2E test: starting conversation with saved persona uses that persona's system prompt in the LLM call in `tests/e2e/us2-persona-creation.spec.ts`
+- [ ] T038 [US2] E2E test in `tests/e2e/us2-persona-management.spec.ts`: AS1 — form shows fields for name, image, system prompt; AS2 — save persona persists and shows in list; AS3 — image upload shows preview; AS4 — persona system prompt used in conversation (verify via mockOpenRouter); AS5 — no-image persona shows placeholder
+
+### Unit Tests for User Story 2
+
+- [ ] T039 [P] [US2] Unit test for PersonaForm in `tests/unit/components/persona/PersonaForm.test.ts`: validates name (>1 char), validates systemPrompt (1–2000 chars), image upload triggers resize, emits save with Persona data
+- [ ] T040 [P] [US2] Unit test for image resize utility in `tests/unit/services/image-resize.test.ts`: resizes image to ≤ 200 KB data URI, preserves aspect ratio, handles invalid input
 
 ### Implementation for User Story 2
 
-- [X] T040 [P] [US2] Implement client-side image resize utility in `src/services/imageResize.ts` — accepts File, returns `data:image/...;base64,...` string ≤200 KB; uses Canvas API to resize proportionally
-- [X] T041 [US2] Implement `src/components/persona/PersonaForm.vue` — fields: name (required, >1 char), system prompt (required, 1–2000 chars), profile image (optional file input with preview); on save emits `saved(persona: Omit<Persona, 'id' | 'createdAt'>)`; shows validation errors inline; calls `imageResize.ts` before storing avatar
-- [X] T042 [US2] Implement `src/views/PersonaListView.vue` — lists all personas via `PersonaCard`; "New persona" button opens `PersonaForm` inline or navigates to creation route; no delete in v1; tapping a persona allows starting a new conversation
-- [X] T043 [US2] Wire `PersonaForm` save to `personas` store `addPersona()` with UUID and `createdAt` generated via `crypto.randomUUID()` and `new Date().toISOString()`
+- [ ] T041 [P] [US2] Implement image resize utility in `src/services/image-resize.ts`: accepts File, returns data URI string ≤ 200 KB via Canvas API resize
+- [ ] T042 [US2] Implement PersonaForm in `src/components/persona/PersonaForm.vue`: name input (>1 char), system prompt textarea (1–2000 chars), image file input → resize → preview, save button calls `personasStore.addPersona()`
+- [ ] T043 [US2] Implement PersonaListView in `src/views/PersonaListView.vue`: lists all personas with PersonaCard, "New persona" button → /personas/new, tap persona → start new conversation
+- [ ] T044 [US2] Wire PersonaForm route: `/personas/new` renders PersonaForm, on save navigate back to persona list
 
-**Checkpoint**: US2 complete — full persona lifecycle; US1 + US2 work together
+**Checkpoint**: Full persona creation operational with image resize
 
 ---
 
 ## Phase 5: User Story 3 — Single-Word Lookup (Priority: P3)
 
-**Goal**: Every Chinese word in any message is tappable; popup shows pinyin + English translation from pre-fetched `wordTranslations`
+**Goal**: Tap any Chinese word in an assistant message to see pinyin + translation popup. Pre-fetched via LLM on message arrival, matched to text via AnnotatedWord algorithm.
 
-**Independent Test**: Open any conversation with Chinese text → tap a word → verify pinyin and translation popup appears within 2 s; tap outside to dismiss
+**Independent Test**: Open conversation with Chinese assistant messages → tap a word → popup shows pinyin + translation
 
-### E2E Tests for User Story 3 ⚠️ Write FIRST — must FAIL before implementation
+**Depends on**: US1 (needs PersonaMessage to exist)
 
-- [X] T044 [US3] Write E2E test: tapping a Chinese word in an assistant message shows popup with pinyin and translation in `tests/e2e/us3-word-lookup.spec.ts`
-- [X] T045 [US3] Write E2E test: tapping outside popup dismisses it; tapping user-sent message word also works; word with no translation shows "No translation found" in `tests/e2e/us3-word-lookup.spec.ts`
+### E2E Tests for User Story 3
+
+- [ ] T045 [US3] E2E test in `tests/e2e/us3-word-lookup.spec.ts`: AS1 — tap word in assistant message shows pinyin + translation popup; AS2 — dismiss popup on tap outside; AS3 — "No translation found" for untranslatable words; AS4 — only assistant messages are tappable (user messages not tappable)
+
+### Unit Tests for User Story 3
+
+- [ ] T046 [P] [US3] Unit test for `matchTranslationsToText()` in `tests/unit/services/translation-matcher.test.ts`: exact word match, punctuation skipping (CJK + ASCII), LLM double-word skip, unmatched chars get `null` pinyin/translation, empty input, mixed Chinese + punctuation text
+- [ ] T047 [P] [US3] Unit test for `isPunctuation()` in `tests/unit/services/translation-matcher.test.ts`: CJK punctuation (。，！？、), ASCII punctuation (.,!? ), spaces, non-punctuation returns false
+- [ ] T048 [P] [US3] Unit test for `translateMessage()` in `tests/unit/services/openrouter.test.ts`: sends correct payload per `openrouter-translation.md` contract (system prompt about splitting words, user prompt with quoted text, json_schema with word/pinyin/translation — no startIndex), parses WordTranslation[] from response, calls `matchTranslationsToText()` to produce AnnotatedWord[], handles errors
+- [ ] T049 [P] [US3] Unit test for WordPopup in `tests/unit/components/chat/WordPopup.test.ts`: renders pinyin + translation, positions near tapped word, dismisses on outside click, shows "No translation found" when pinyin is null
+- [ ] T050 [P] [US3] Unit test for ChatMessage with AnnotatedWord rendering in `tests/unit/components/chat/ChatMessage.test.ts`: PersonaMessage renders word spans from renderTokens, each tappable span triggers WordPopup, UserMessage has no word spans
 
 ### Implementation for User Story 3
 
-- [X] T046 [P] [US3] Implement `src/components/chat/WordPopup.vue` — positioned popup showing `pinyin`, `translation`, and optional "No translation found" fallback; emits `dismiss`; accepts `wordTranslation: WordTranslation | null` and `loading: boolean`
-- [X] T047 [US3] Upgrade `src/components/chat/ChatMessage.vue` for word segmentation — use `segmenter.ts` to split `content` into `<span>` elements for Chinese-script segments; attach tap handler per span; on tap: look up index in `message.wordTranslations`; show `WordPopup`; show loading shimmer while `wordTranslationStatus === 'pending'`; show "Translation unavailable" if `wordTranslationStatus === 'error'`
-- [X] T048 [US3] Wire `translateMessage()` call in `src/views/ChatView.vue` — fires sequentially after assistant message is received; stores result via `updateMessageWordTranslations()` in conversations store
+- [ ] T051 [P] [US3] Implement `isPunctuation()` and `matchTranslationsToText()` in `src/services/translation-matcher.ts` per data-model.md algorithm: iterates text chars, matches against WordTranslation queue, handles punctuation/exact match/double-word skip/unmatched fallback, returns AnnotatedWord[]
+- [ ] T052 [US3] Implement `translateMessage()` in `src/services/openrouter.ts`: sends translation request per `openrouter-translation.md` contract (updated system/user prompts, no startIndex in schema), parses WordTranslation[], calls `matchTranslationsToText()`, returns AnnotatedWord[]
+- [ ] T053 [US3] Implement WordPopup in `src/components/chat/WordPopup.vue`: accepts `word`, `pinyin`, `translation` props (nullable), positioned absolutely near trigger element, close on outside click/Escape, "No translation found" when null, optional loading spinner
+- [ ] T054 [US3] Extend ChatMessage for PersonaMessage word rendering in `src/components/chat/ChatMessage.vue`: when `message.role === 'assistant'` and `renderTokens` resolved, render content as `<span>` per AnnotatedWord, attach tap handler → show WordPopup, shimmer loading while `wordTranslationStatus === 'pending'`, "Translation unavailable" if `wordTranslationStatus === 'error'`
+- [ ] T055 [US3] Wire translation pre-fetch in ChatView `src/views/ChatView.vue`: after `chatReply()` resolves and PersonaMessage added, call `translateMessage()` → store AnnotatedWord[] on `PersonaMessage.renderTokens` via `conversationsStore.updateMessageTranslations()`, handle error → set `wordTranslationStatus: 'error'`
 
-**Checkpoint**: US3 complete — single-word lookup is live; US1 + US2 + US3 all functional
+**Checkpoint**: Single-word lookup fully functional on all assistant messages
 
 ---
 
 ## Phase 6: User Story 4 — Multi-Word Phrase Lookup (Priority: P4)
 
-**Goal**: Press-and-drag gesture over Chinese text in any message triggers on-demand phrase translation popup
+**Goal**: Press-and-drag over Chinese text in assistant messages to see combined pinyin + translation for the selected phrase
 
-**Independent Test**: In a conversation with Chinese text — press and drag over 2+ words → release → popup appears with combined phrase pinyin and translation
+**Independent Test**: Drag over 2+ words in assistant message → popup with phrase pinyin + translation
 
-### E2E Tests for User Story 4 ⚠️ Write FIRST — must FAIL before implementation
+**Depends on**: US3 (extends the word-tap interaction pattern and WordPopup)
 
-- [X] T049 [US4] Write E2E test: press-and-drag over multiple Chinese words and release shows phrase popup with pinyin and translation in `tests/e2e/us4-phrase-lookup.spec.ts`
-- [X] T050 [US4] Write E2E test: drag selection including punctuation only sends Chinese characters to lookup; dismissing popup clears selection in `tests/e2e/us4-phrase-lookup.spec.ts`
+### E2E Tests for User Story 4
+
+- [ ] T056 [US4] E2E test in `tests/e2e/us4-phrase-lookup.spec.ts`: AS1 — drag selection shows phrase popup with pinyin + translation; AS2 — punctuation excluded from lookup text; AS3 — dismiss popup clears selection
+
+### Unit Tests for User Story 4
+
+- [ ] T057 [P] [US4] Unit test for `translatePhrase()` in `tests/unit/services/openrouter.test.ts`: sends correct payload per `openrouter-phrase-lookup.md` contract, strips punctuation from input, parses phrase/pinyin/translation, handles errors
+- [ ] T058 [P] [US4] Unit test for phrase drag interaction in `tests/unit/components/chat/ChatMessage.test.ts`: pointerdown + pointermove + pointerup across AnnotatedWord spans produces selected text, popup shown on release with loading then result
 
 ### Implementation for User Story 4
 
-- [X] T051 [P] [US4] Implement drag gesture handler in `src/components/chat/ChatMessage.vue` — detect `pointerdown` + `pointermove` + `pointerup` sequence over Chinese spans; on release extract selected text, strip punctuation; if non-empty fire `translatePhrase()` and show `WordPopup` in loading state
-- [X] T052 [US4] Implement `translatePhrase()` call integration in `src/components/chat/ChatMessage.vue` — calls `openrouter.translatePhrase(selectedText)`; on resolve populates `WordPopup`; on error shows "Translation unavailable"; cancels in-flight call if popup dismissed before response
+- [ ] T059 [US4] Implement `translatePhrase()` in `src/services/openrouter.ts` per `openrouter-phrase-lookup.md` contract: strip punctuation from input, send request, parse response
+- [ ] T060 [US4] Extend ChatMessage with drag-select in `src/components/chat/ChatMessage.vue`: pointerdown/pointermove/pointerup handlers on AnnotatedWord spans, collect selected text, strip punctuation, on release call `translatePhrase()`, show WordPopup in loading → result, cancel in-flight on dismiss
+- [ ] T061 [US4] Extend WordPopup for phrase mode in `src/components/chat/WordPopup.vue`: accept optional `loading` prop, show spinner while phrase lookup in progress, display phrase + pinyin + translation on resolve
 
-**Checkpoint**: US4 complete — phrase lookup extends word lookup; US1–4 all functional
+**Checkpoint**: Both single-word tap and multi-word drag lookup fully functional
 
 ---
 
-## Phase 7: User Story 5 — Message Feedback (Grammar and Correction) (Priority: P5)
+## Phase 7: User Story 5 — Message Feedback (Priority: P5)
 
-**Goal**: Feedback icon on every sent user message — green (correct) or red (errors); tapping opens correction dialog with character-level diff
+**Goal**: Grammar feedback on user messages — green/red icon, correction diff dialog with character-level highlighting
 
-**Independent Test**: Send grammatically correct Chinese message → green icon appears ≤5 s; send message with deliberate error → red icon appears; tap red icon → diff dialog shows wrong chars in red, added chars in green
+**Independent Test**: Send correct Chinese → green icon → tap shows translation; Send incorrect Chinese → red icon → tap shows diff dialog
 
-### E2E Tests for User Story 5 ⚠️ Write FIRST — must FAIL before implementation
+**Depends on**: US1 (needs UserMessage in conversation)
 
-- [X] T053 [US5] Write E2E test: sending a Chinese message shows loading indicator on bubble; correct message resolves to green icon; incorrect message resolves to red icon in `tests/e2e/us5-message-feedback.spec.ts`
-- [X] T054 [US5] Write E2E test: tapping green icon opens dialog with English translation; tapping red icon opens diff dialog with wrong chars red and added chars green; dismissing closes dialog in `tests/e2e/us5-message-feedback.spec.ts`
-- [X] T055 [US5] Write E2E test: feedback call failure shows error icon state without affecting the displayed chat reply in `tests/e2e/us5-message-feedback.spec.ts`
+### E2E Tests for User Story 5
+
+- [ ] T062 [US5] E2E test in `tests/e2e/us5-message-feedback.spec.ts`: AS1 — feedback icon appears (green/red) after send; AS2 — green icon tap shows translation dialog; AS3 — red icon tap shows diff dialog with red/green highlighting; AS4 — dismiss dialog; AS5 — loading indicator while pending
+
+### Unit Tests for User Story 5
+
+- [ ] T063 [P] [US5] Unit test for `grammarFeedback()` in `tests/unit/services/openrouter.test.ts`: sends correct payload per `openrouter-feedback.md` contract, parses FeedbackResult (camelCase normalisation from is_correct), handles errors
+- [ ] T064 [P] [US5] Unit test for diff service in `tests/unit/services/diff.test.ts`: `computeDiff()` returns array of `{value, added?, removed?}` from jsdiff `diffChars()`, Chinese character diffs work correctly, identical strings produce single unchanged segment
+- [ ] T065 [P] [US5] Unit test for FeedbackIcon in `tests/unit/components/chat/FeedbackIcon.test.ts`: green icon when `isCorrect`, red icon when not, loading spinner when `feedbackStatus === 'pending'`, error icon when `feedbackStatus === 'error'`, emits click
+- [ ] T066 [P] [US5] Unit test for CorrectionDialog in `tests/unit/components/chat/CorrectionDialog.test.ts`: green mode shows translation only, red mode shows original + corrected with diff spans (red `.removed`, green `.added`), dismiss emits close
 
 ### Implementation for User Story 5
 
-- [X] T056 [P] [US5] Implement `src/components/chat/FeedbackIcon.vue` — shows green ✓, red ✗, grey loading spinner, or grey ⚠ error state based on `feedbackStatus` and `feedback.isCorrect`; emits `tap`
-- [X] T057 [P] [US5] Implement `src/components/chat/TranslationDialog.vue` — modal dialog showing English translation (`feedback.translation`); shown when `isCorrect === true`; emits `dismiss`
-- [X] T058 [P] [US5] Implement `src/components/chat/CorrectionDialog.vue` — modal dialog showing original message on top and corrected on bottom; uses `diff.ts diffChars()` to render character-level diff with wrong/replaced chars in red and added chars in green; shown when `isCorrect === false`; emits `dismiss`
-- [X] T059 [US5] Integrate `FeedbackIcon` into `src/components/chat/ChatMessage.vue` — render on user-role messages only; wire to `message.feedbackStatus` and `message.feedback`; on tap open `TranslationDialog` or `CorrectionDialog` based on `isCorrect`
-- [X] T060 [US5] Verify `grammarFeedback()` call in `src/views/ChatView.vue` fires in parallel with `chatReply()` on user message send; result stored via `updateMessageFeedback()` in conversations store; error sets `feedbackStatus: 'error'`
+- [ ] T067 [P] [US5] Implement diff service in `src/services/diff.ts`: `computeDiff(original, corrected)` wrapping jsdiff `diffChars()`, returns typed array of `{value, type: 'equal'|'added'|'removed'}`
+- [ ] T068 [P] [US5] Implement `grammarFeedback()` in `src/services/openrouter.ts` per `openrouter-feedback.md` contract: fixed grammar teacher system prompt, single user message, parses FeedbackResult with camelCase normalisation
+- [ ] T069 [P] [US5] Implement FeedbackIcon in `src/components/chat/FeedbackIcon.vue`: green/red/loading/error states based on `feedbackStatus` and `feedback.isCorrect`, emits click
+- [ ] T070 [US5] Implement CorrectionDialog in `src/components/chat/CorrectionDialog.vue`: green mode (translation only), red mode (original on top, corrected on bottom with diff spans — red `.removed`, green `.added`), dismiss button/overlay
+- [ ] T071 [US5] Wire feedback call in ChatView `src/views/ChatView.vue`: on user message send, fire `grammarFeedback()` in parallel with `chatReply()` (independent promises, NOT Promise.all), store FeedbackResult on UserMessage via `conversationsStore.updateMessageFeedback()`, handle errors independently → set `feedbackStatus: 'error'`
+- [ ] T072 [US5] Extend ChatMessage for UserMessage feedback in `src/components/chat/ChatMessage.vue`: when `message.role === 'user'`, show FeedbackIcon, tap icon → open CorrectionDialog with feedback data + original content
 
-**Checkpoint**: US5 complete — full grammar feedback loop; all 5 user stories functional
+**Checkpoint**: Full grammar feedback loop — send message → see icon → tap for details
 
 ---
 
 ## Phase 8: Settings Screen
 
-**Purpose**: API key entry + context window + per-action model configuration (required by FR-014, FR-015, FR-016, FR-017)
+**Purpose**: API key entry + context window + per-action model configuration (FR-014, FR-015, FR-016, FR-017)
 
-### E2E Tests for Settings Screen ⚠️ Write FIRST — must FAIL before implementation
+### E2E Tests for Settings
 
-- [X] T061a [P] Write E2E test: settings screen renders API key input, context window slider, and four model string inputs; saving API key stores it via credentials service (mock credential API in Playwright); changing context window persists after reload in `tests/e2e/us-settings.spec.ts`
+- [ ] T073 [P] E2E test in `tests/e2e/settings.spec.ts`: settings screen renders API key input, context window slider, and four model string inputs; saving persists after reload; API key saved via credentials service (mock)
 
-### Implementation
+### Unit Tests for Settings
 
-- [X] T061 Write failing unit tests for `SettingsView` (renders API key input, saves via credentials service, shows context window slider, shows four model inputs, persists settings) in `tests/unit/stores/settings.test.ts`
-- [X] T062 Implement `src/views/SettingsView.vue` — input for OpenRouter API key with save button (calls `credentials.saveApiKey()`); number input for context window size N (range 1–50, default 8) wired to `settings` store; four text inputs for per-action model strings (`chatModel`, `feedbackModel`, `translationModel`, `phraseLookupModel`) defaulting to `deepseek/deepseek-v3.2` for chat/feedback and `openai/gpt-oss-120b` for translation/phrase lookup, all wired to `settings` store; error message if Credential Management API unavailable; no localStorage fallback for API key
-- [X] T062a Wire `settings.contextWindowSize` into message-window slice — `openrouter.chatReply()` MUST accept `contextWindowSize` as a parameter (or read from settings store) and slice the last N messages accordingly; add a unit test in `tests/unit/services/openrouter.test.ts` asserting slice length matches N; add a unit test in `tests/unit/stores/settings.test.ts` verifying the value is applied when changed (FR-016)
+- [ ] T074 [P] Unit test for SettingsView in `tests/unit/views/SettingsView.test.ts`: renders all inputs, saves API key via credentials service, context window validates range 1–50, model inputs show defaults
+
+### Implementation for Settings
+
+- [ ] T075 Implement SettingsView in `src/views/SettingsView.vue`: API key input + save (calls `credentials.saveApiKey()` and updates `settingsStore.apiKey`), context window slider (1–50, default 8), 4 model string inputs (defaults: deepseek/deepseek-v3.2 for chat/feedback, openai/gpt-oss-120b for translation/phrase), Credential API unavailable banner, toast on successful save
 
 ---
 
@@ -194,23 +237,22 @@
 
 **Purpose**: Error handling, edge cases, performance, and final validation
 
-### Error-Path E2E Tests ⚠️ Constitution III mandate — critical error paths must have E2E coverage
+### Error-Path E2E Tests
 
-- [X] T062b [P] Write E2E test: AI endpoint unreachable (mock returns network error) → inline retry error shown on message bubble; tapping retry re-fires the call in `tests/e2e/error-paths.spec.ts`
-- [X] T062c [P] Write E2E test: feedback call fails but chat reply succeeds → error icon shown on message bubble, AI reply displayed normally in `tests/e2e/error-paths.spec.ts`
-- [X] T062d [P] Write E2E test: no API key stored → sending a message redirects to `/settings?reason=no-key` with explanatory message in `tests/e2e/error-paths.spec.ts`
+- [ ] T076 [P] E2E test in `tests/e2e/error-paths.spec.ts`: AI endpoint unreachable → inline retry error on message bubble
+- [ ] T077 [P] E2E test in `tests/e2e/error-paths.spec.ts`: feedback call fails but chat reply succeeds → error icon, AI reply displayed normally
+- [ ] T078 [P] E2E test in `tests/e2e/error-paths.spec.ts`: no API key stored → sending message redirects to `/settings` with toast message
 
 ### Implementation
 
-- [X] T063 [P] Implement "no API key" guard in `src/views/ChatView.vue` — before any LLM call check `credentials.getApiKey()`; if null redirect to `/settings` with query param `?reason=no-key`; show explanatory message in `SettingsView` when param present (FR-015)
-- [X] T064 [P] Implement "Credential Management API unavailable" error in `src/views/SettingsView.vue` — check `isCredentialApiAvailable()` on mount; if false show informational banner explaining the browser limitation (FR-014 constraint)
-- [X] T065 [P] Handle orphaned conversations in `src/views/HomeView.vue` — when `conversation.personaId` references a deleted persona, display "Deleted persona" placeholder text and fallback avatar
-- [X] T066 [P] Implement non-Chinese message graceful degradation — in `ChatMessage.vue` if content contains no Chinese characters, skip segmenter and disable word-tap; in feedback result, show "N/A — not Chinese text" state rather than error
-- [X] T067 [P] Add retry button to failed chat reply message bubbles in `src/components/chat/ChatMessage.vue` — emits `retry(messageId)` event; `ChatView` re-fires `chatReply()` on retry
-- [X] T068 [P] Ensure chat scroll behaviour in `src/views/ChatView.vue` — auto-scroll to bottom on new message; maintain scroll position when history is loaded; `ChatMessage` list must remain performant at 500+ messages
-- [X] T069 Implement storage quota error handling in `src/stores/conversations.ts` — catch `QuotaExceededError` on localStorage write; surface to UI via a reactive `storageError` ref; `ChatView` shows notification and aborts the message send
-- [X] T070 [P] Mobile-first CSS audit — verify all views (HomeView, ChatView, PersonaListView, SettingsView) are usable at 375px viewport width without horizontal scroll; test on `mobile-iphone` Playwright project
-- [X] T071 Run full quickstart.md validation checklist — `npm run test:unit:run`, `npm run build && npm run test:e2e`, open `dist/index.html` via `file://`, verify no API key in localStorage, verify credential in DevTools Passwords, verify offline navigation
+- [ ] T079 [P] Implement retry button on failed chat reply in `src/components/chat/ChatMessage.vue`: emits `retry(messageId)`, ChatView re-fires `chatReply()`
+- [ ] T080 [P] Handle Credential Management API unavailable: persistent banner in `src/App.vue` when `!isCredentialApiAvailable()`
+- [ ] T081 [P] Handle non-Chinese message gracefully: skip word segmentation + disable tap in ChatMessage, feedback shows "N/A — not Chinese text"
+- [ ] T082 [P] Handle orphaned conversations in HomeView: when `personaId` references missing persona, show "Deleted persona" placeholder
+- [ ] T083 Ensure chat scroll in ChatView: auto-scroll to bottom on new message, remain performant at 500+ messages
+- [ ] T084 [P] Handle storage quota error in conversations store: catch `QuotaExceededError`, surface via reactive ref, ChatView shows notification
+- [ ] T085 [P] Mobile-first CSS audit: all views usable at 375px, touch targets ≥ 44px
+- [ ] T086 Run quickstart.md validation: `npm run test:unit:run`, `npm run build && npm run test:e2e`, `file://` loads, no API key in localStorage, offline navigation works
 
 ---
 
@@ -218,83 +260,78 @@
 
 ### Phase Dependencies
 
-- **Setup (Phase 1)**: No dependencies — start immediately; tasks T003–T008 can run in parallel after T001–T002
-- **Foundational (Phase 2)**: Depends on Phase 1 completion — BLOCKS all user story phases
-- **US1 (Phase 3)**: Depends on Phase 2 — MVP slice; no dependency on US2–5
-- **US2 (Phase 4)**: Depends on Phase 2; integrates with US1 `PersonaCard` and `personas` store
-- **US3 (Phase 5)**: Depends on Phase 2 and US1 (ChatMessage, conversations store with wordTranslations); requires `translateMessage()` wired in ChatView
-- **US4 (Phase 6)**: Depends on US3 (WordPopup, drag gesture base in ChatMessage)
-- **US5 (Phase 7)**: Depends on Phase 2 and US1 (ChatView parallel call wiring, conversations store feedback fields)
-- **Settings (Phase 8)**: Depends on Phase 2; can be implemented in parallel with any user story phase
-- **Polish (Phase 9)**: Depends on all user story phases being complete
+- **Setup (Phase 1)**: No dependencies — start immediately
+- **Foundational (Phase 2)**: Depends on Setup — BLOCKS all user stories
+- **US1 (Phase 3)**: Depends on Foundational — MVP
+- **US2 (Phase 4)**: Depends on Foundational — can run parallel to US1
+- **US3 (Phase 5)**: Depends on US1 (needs PersonaMessage)
+- **US4 (Phase 6)**: Depends on US3 (extends word-tap + WordPopup)
+- **US5 (Phase 7)**: Depends on US1 (needs UserMessage) — can run parallel to US3/US4
+- **Settings (Phase 8)**: Depends on Foundational — can run parallel to any story
+- **Polish (Phase 9)**: Depends on all stories complete
 
 ### User Story Dependencies
 
 ```
 Phase 1 (Setup)
-  └─► Phase 2 (Foundational)
-        ├─► Phase 3 (US1) ─── MVP; no story deps
-        ├─► Phase 4 (US2) ─── integrates US1 components
-        ├─► Phase 3 (US1) ─► Phase 5 (US3) ─► Phase 6 (US4)
-        ├─► Phase 3 (US1) ─► Phase 7 (US5)
-        └─► Phase 8 (Settings) — parallel with any US phase
-              └─► Phase 9 (Polish)
+  └─▶ Phase 2 (Foundational)
+        ├─▶ Phase 3 (US1 - MVP) ─────┬─▶ Phase 5 (US3 - Word Lookup) ─▶ Phase 6 (US4 - Phrase Lookup)
+        │                             │
+        │                             └─▶ Phase 7 (US5 - Feedback)
+        │
+        ├─▶ Phase 4 (US2 - Personas) [parallel to US1]
+        │
+        └─▶ Phase 8 (Settings) [parallel to any story]
+                                          │
+                                          └───────────────────────────▶ Phase 9 (Polish)
 ```
 
 ### Within Each User Story
 
-1. E2E tests written first and committed (must FAIL)
-2. Parallel [P] implementation tasks (components, services)
-3. Sequential integration tasks (wiring into views/stores)
-4. E2E must PASS against `vite build` output before story is marked complete
+1. E2E tests MUST be written and FAIL before implementation
+2. Unit tests MUST be written and FAIL before implementation
+3. Services/utilities before components
+4. Components before views
+5. Views integrate everything
+6. Story complete → checkpoint → next priority
+
+### Parallel Opportunities
+
+**Phase 1**: T003, T004, T005, T007, T008, T009 can all run in parallel (after T001–T002)
+**Phase 2 tests**: T010–T015 can all run in parallel
+**Phase 2 impl**: T016, T017 parallel; T018 after T016 (needs credentials); T019 after T017; T020 after T018 (needs settings store for apiKey)
+**US1 unit tests**: T023–T028 can all run in parallel
+**US1 impl**: T029–T032 parallel; T033 after T032; T034, T035 after components
+**US3 + US5**: Can run entirely in parallel (different files, different services)
 
 ---
 
-## Parallel Execution Examples
-
-### Phase 2 Foundational (run all in parallel after Phase 1)
+## Parallel Example: User Story 1
 
 ```
-T009+T010 (credentials service)     ─┐
-T011+T012 (openrouter service)       ├─ all independent files
-T013+T014 (segmenter service)        │
-T015+T016 (diff service)             │
-T017+T018 (personas store)           │
-T019+T020 (conversations store)      │
-T021+T022 (settings store)          ─┘
-T023 (main.ts) — after stores done
-T024 (router) — parallel with T023
+# Unit tests (all parallel):
+T023 (HomeView test), T024 (ChatView test), T025 (ChatInput test),
+T026 (ChatMessage test), T027 (PersonaPicker test), T028 (AvatarPlaceholder test)
+
+# Components (all parallel):
+T029 (AvatarPlaceholder), T030 (ChatInput), T031 (ChatMessage), T032 (PersonaCard)
+
+# Then sequential:
+T033 (PersonaPicker) → T034 (HomeView) → T035 (ChatView) → T036 (API key guard) → T037 (default persona)
 ```
 
-### Phase 3 US1 (after E2E tests T025–T028 are written and failing)
+---
+
+## Parallel Example: US3 + US5 Simultaneously
 
 ```
-T029 (AvatarPlaceholder) ─┐
-T030 (PersonaCard)         ├─ parallel (different files)
-T033 (ChatInput)           │
-T034 (ChatMessage subset) ─┘
-T031 (PersonaPicker) — after T030
-T032 (HomeView) — after T031, T029
-T035 (ChatView) — after T033, T034
-T036 (App.vue) — parallel with views
-```
-
-### Phase 5 US3 (after E2E tests T044–T045 are written and failing)
-
-```
-T046 (WordPopup) ─┐ parallel
-T048 (translateMessage wire) — after T046
-T047 (ChatMessage word segmentation) — after T046, T048
-```
-
-### Phase 7 US5 (after E2E tests T053–T055 are written and failing)
-
-```
-T056 (FeedbackIcon)        ─┐
-T057 (TranslationDialog)    ├─ parallel (different files)
-T058 (CorrectionDialog)    ─┘
-T059 (ChatMessage integrate FeedbackIcon) — after T056, T057, T058
-T060 (ChatView feedback wiring verify) — after T059
+## US3 (Word Lookup):                   ## US5 (Feedback) — same time:
+T051 (matchTranslationsToText)           T067 (diff service)
+T052 (translateMessage)                  T068 (grammarFeedback)
+T053 (WordPopup)                         T069 (FeedbackIcon)
+T054 (ChatMessage word spans)            T070 (CorrectionDialog)
+T055 (ChatView translation wire)         T071 (ChatView feedback wire)
+                                         T072 (ChatMessage feedback icon)
 ```
 
 ---
@@ -305,20 +342,30 @@ T060 (ChatView feedback wiring verify) — after T059
 
 1. Complete Phase 1: Setup
 2. Complete Phase 2: Foundational (CRITICAL — blocks all stories)
-3. Complete Phase 3: User Story 1 (including E2E tests passing)
+3. Complete Phase 3: User Story 1
 4. **STOP and VALIDATE**: Run `npm run build && npm run test:e2e`
-5. Demo/deploy — app is usable with a default persona
+5. Deploy — app is usable with basic chat
 
 ### Incremental Delivery
 
-1. Phase 1 + Phase 2 → Foundation ready
-2. Phase 3 (US1) → Working chat MVP ✓ demo
-3. Phase 4 (US2) → Full persona management ✓ demo
-4. Phase 8 (Settings) → Production-ready API key UX ✓
-5. Phase 5 (US3) → Word lookup live ✓
-6. Phase 6 (US4) → Phrase lookup live ✓
-7. Phase 7 (US5) → Grammar feedback live ✓ full feature complete
-8. Phase 9 (Polish) → Production hardening ✓
+1. Setup + Foundational → Foundation ready
+2. US1 → Working chat MVP → Deploy
+3. US2 → Enhanced persona management → Deploy
+4. Settings → Production-ready API key UX
+5. US3 → Word lookup adds learning value → Deploy
+6. US5 → Grammar feedback adds correction value → Deploy
+7. US4 → Phrase lookup extends learning → Deploy
+8. Polish → Production-ready
+
+### Solo Developer Path (Recommended)
+
+1. Setup + Foundational → **validate stores persist with Date objects**
+2. US1 + US2 together → **full persona + chat flow**
+3. Settings → **API key UX complete**
+4. US3 → **word lookup with AnnotatedWord matching**
+5. US5 → **grammar feedback with diff** (can skip US4 initially)
+6. US4 → **phrase drag extends lookup**
+7. Polish → **error handling, mobile, performance**
 
 ### TDD Gate (Per Constitution)
 
@@ -332,13 +379,13 @@ For every feature task:
 
 ## Notes
 
-- **OpenRouter API in tests**: Unit tests mock `fetch` via `vi.fn()`; E2E tests intercept `https://openrouter.ai/api/v1/chat/completions` using Playwright `page.route()` via the shared `mockOpenRouter()` fixture in `tests/e2e/fixtures/openrouter.ts` — no real network calls or API key required in CI; manual validation (quickstart.md) uses the real endpoint
-- [P] tasks = different files, no dependencies within the phase — safe to run in parallel
-- [Story] label maps each task to its user story for traceability
-- E2E tests are written before any implementation in that story starts (TDD constitution mandate)
-- `crypto.randomUUID()` for all entity IDs — no external UUID library needed
-- API key MUST use Credential Management API; no localStorage fallback; tests must verify absence of key in localStorage
-- `Intl.Segmenter` is used for Chinese tokenisation — no WASM or external dictionary library
-- `jsdiff diffChars()` is used for correction diff — no custom LCS implementation
-- Profile images resized client-side via Canvas API before storage; max 200 KB per image
-- Stop at any checkpoint to validate the story independently before proceeding
+- **Data model changes reflected**: Messages use type hierarchy (BaseMessage/UserMessage/PersonaMessage); dates are native Date; messages embedded in Conversation; AnnotatedWord replaces old WordTranslation+startIndex approach; API key loaded once at startup into SettingsStore
+- **OpenRouter API in tests**: Unit tests mock `fetch` via `vi.fn()`; E2E tests intercept via Playwright `page.route()` using `mockOpenRouter()` fixture — no real API calls in CI
+- [P] tasks = different files, no dependencies on incomplete tasks
+- [Story] label maps task to user story for traceability
+- `crypto.randomUUID()` for all entity IDs
+- API key MUST use Credential Management API; never localStorage; loaded once into settings store at app start
+- `Intl.Segmenter` for Chinese tokenisation (no WASM)
+- `jsdiff diffChars()` for correction diff
+- Profile images resized via Canvas API before storage (max 200 KB)
+- Stop at any checkpoint to validate story independently
