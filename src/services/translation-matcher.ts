@@ -47,7 +47,8 @@ export function matchTranslationsToText(
       if (firstWord === currentChar) {
         queue.shift()
       } else if (firstWord && firstWord.startsWith(currentChar)) {
-        queue[0] = { ...queue[0], word: firstWord.replace(currentChar, '') }
+        const head = queue[0]!
+        queue[0] = { word: firstWord.replace(currentChar, ''), pinyin: head.pinyin, translation: head.translation }
       }
       result.push({ word: currentChar, pinyin: null, translation: null })
       i += 1

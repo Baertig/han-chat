@@ -6,6 +6,9 @@
     // Extra safety for array and object lookups, but may have false positives.
     "noUncheckedIndexedAccess": true,
 
+    // Include Credential Management API types (PasswordCredential, etc.)
+    "types": ["webappsec-credential-management"],
+
     // Path mapping for cleaner imports.
     "paths": {
       "@/*": ["./src/*"]
