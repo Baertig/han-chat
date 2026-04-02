@@ -1,6 +1,6 @@
 # han-chat Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-03-29
+Auto-generated from all feature plans. Last updated: 2026-04-02
 
 ## Active Technologies
 - TypeScript 6.x strict mode (001-chinese-tandem-chat)
@@ -14,6 +14,8 @@ Auto-generated from all feature plans. Last updated: 2026-03-29
 - jsdiff `diffChars()` (character-level correction diff)
 - Vitest + @testing-library/vue + happy-dom (unit tests)
 - Playwright + vite preview (E2E tests against production build)
+- TypeScript 6.x strict mode, Vue 3.5+ `<script setup>` + Vue 3.5, Vite 8.x, Pinia 2, lucide-vue-next (new), Google Fonts CDN (Noto Sans SC + Roboto) (002-ui-polish-theming)
+- localStorage (Pinia persisted state for text size preference) (002-ui-polish-theming)
 
 ## Project Structure
 
@@ -77,6 +79,7 @@ On phrase drag release, 1 on-demand call fires:
 All calls use structured JSON output (response_format: json_schema) except chat reply.
 
 ## Recent Changes
+- 002-ui-polish-theming: Added TypeScript 6.x strict mode, Vue 3.5+ `<script setup>` + Vue 3.5, Vite 8.x, Pinia 2, lucide-vue-next (new), Google Fonts CDN (Noto Sans SC + Roboto)
 
 - 001-chinese-tandem-chat: Updated plan — native Date types, Message type hierarchy (BaseMessage/UserMessage/PersonaMessage), AnnotatedWord matching algorithm, API key loaded once at startup
 
