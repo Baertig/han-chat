@@ -14,6 +14,7 @@ const emit = defineEmits<{
 }>()
 
 const popupRef = ref<HTMLElement | null>(null)
+let clickListenerTimer: ReturnType<typeof setTimeout> | null = null
 
 function handleClickOutside(event: MouseEvent) {
   if (popupRef.value && !popupRef.value.contains(event.target as Node)) {
@@ -28,11 +29,18 @@ function handleKeydown(event: KeyboardEvent) {
 }
 
 onMounted(() => {
-  document.addEventListener('click', handleClickOutside, true)
+  // Defer click-outside listener by one tick so the originating click/pointerup
+  // event that opened this popup doesn't immediately dismiss it.
+  clickListenerTimer = setTimeout(() => {
+    document.addEventListener('click', handleClickOutside, true)
+  }, 0)
   document.addEventListener('keydown', handleKeydown)
 })
 
 onUnmounted(() => {
+  if (clickListenerTimer !== null) {
+    clearTimeout(clickListenerTimer)
+  }
   document.removeEventListener('click', handleClickOutside, true)
   document.removeEventListener('keydown', handleKeydown)
 })
@@ -50,6 +58,12 @@ onUnmounted(() => {
       transform: 'translate(-50%, -100%)',
     } : {}"
   >
+    <button
+      class="popup-close"
+      data-testid="popup-close"
+      aria-label="Close"
+      @click.stop="emit('dismiss')"
+    >&times;</button>
     <div v-if="loading" class="popup-loading" data-testid="popup-loading">
       Loading...
     </div>
@@ -66,6 +80,7 @@ onUnmounted(() => {
 
 <style scoped>
 .word-popup {
+  position: relative;
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
@@ -74,6 +89,30 @@ onUnmounted(() => {
   z-index: 200;
   min-width: 120px;
   text-align: center;
+}
+
+.popup-close {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 18px;
+  padding: 0;
+  color: #9ca3af;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.popup-close:hover {
+  color: #6b7280;
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .popup-word {

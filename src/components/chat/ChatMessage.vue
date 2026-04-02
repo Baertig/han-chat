@@ -26,6 +26,7 @@ const phraseResult = ref<{ word: string; pinyin: string | null; translation: str
 const isDragging = ref(false)
 const dragStartIdx = ref<number | null>(null)
 const dragEndIdx = ref<number | null>(null)
+const selectionLocked = ref(false)
 let abortController: AbortController | null = null
 
 // Feedback dialog state
@@ -56,6 +57,7 @@ function dismissPopup() {
   isDragging.value = false
   dragStartIdx.value = null
   dragEndIdx.value = null
+  selectionLocked.value = false
   if (abortController) {
     abortController.abort()
     abortController = null
@@ -69,15 +71,42 @@ function handlePointerDown(idx: number) {
   isDragging.value = false
 }
 
-function handlePointerMove(idx: number) {
+/** Resolve word index from screen coordinates via hit-testing. */
+function wordIdxFromPoint(x: number, y: number): number | null {
+  const el = document.elementFromPoint(x, y) as HTMLElement | null
+  const attr = el?.dataset?.wordIdx
+  if (attr === undefined) return null
+  const n = parseInt(attr, 10)
+  return isNaN(n) ? null : n
+}
+
+/** Update drag range from screen coordinates. Shared by pointer and touch handlers. */
+function updateDragFromCoords(x: number, y: number) {
+  if (selectionLocked.value) return
   if (dragStartIdx.value === null) return
+
+  const idx = wordIdxFromPoint(x, y)
+  if (idx === null) return
+
   if (idx !== dragStartIdx.value) {
     isDragging.value = true
   }
   dragEndIdx.value = idx
 }
 
-async function handlePointerUp(event: PointerEvent) {
+function handlePointerMove(event: PointerEvent) {
+  updateDragFromCoords(event.clientX, event.clientY)
+}
+
+// Touch event fallback — Chromium stops generating pointer events mid-touch-gesture
+// after implicit pointer capture is released. Touch events always fire reliably.
+function handleTouchMove(event: TouchEvent) {
+  const touch = event.touches[0]
+  if (!touch) return
+  updateDragFromCoords(touch.clientX, touch.clientY)
+}
+
+async function finalizeDrag(clientX: number, clientY: number) {
   if (dragStartIdx.value === null || dragEndIdx.value === null) return
   if (!isDragging.value) {
     // Not a drag — let the click handler fire
@@ -94,15 +123,13 @@ async function handlePointerUp(event: PointerEvent) {
   const words = props.message.annotatedWords.slice(start, end + 1)
   const selectedText = words.map((w) => w.word).join('')
 
-  // Position popup near release point
-  const target = event.target as HTMLElement
-  const rect = target.getBoundingClientRect()
+  // Position popup near the last word in the drag range
+  const anchorEl = document.querySelector(`[data-word-idx="${end}"]`) as HTMLElement | null
+  const rect = anchorEl?.getBoundingClientRect() ?? { top: clientY, left: clientX, width: 0, height: 0 }
   popupRect.value = { top: rect.top, left: rect.left, width: rect.width, height: rect.height }
   popupLoading.value = true
   popupWord.value = { word: selectedText, pinyin: null, translation: null }
-
-  dragStartIdx.value = null
-  dragEndIdx.value = null
+  selectionLocked.value = true
 
   // Fire phrase lookup
   abortController = new AbortController()
@@ -119,6 +146,16 @@ async function handlePointerUp(event: PointerEvent) {
       popupLoading.value = false
     }
   }
+}
+
+async function handlePointerUp(event: PointerEvent) {
+  await finalizeDrag(event.clientX, event.clientY)
+}
+
+async function handleTouchEnd(event: TouchEvent) {
+  const touch = event.changedTouches[0]
+  if (!touch) return
+  await finalizeDrag(touch.clientX, touch.clientY)
 }
 
 function isInDragRange(idx: number): boolean {
@@ -145,6 +182,10 @@ function isInDragRange(idx: number): boolean {
       <div
         v-if="message.role === 'assistant' && message.annotatedWords"
         class="content annotated"
+        @pointermove="handlePointerMove($event)"
+        @pointerup="handlePointerUp($event)"
+        @touchmove.prevent="handleTouchMove($event)"
+        @touchend="handleTouchEnd($event)"
       >
         <span
           v-for="(aw, idx) in message.annotatedWords"
@@ -152,10 +193,9 @@ function isInDragRange(idx: number): boolean {
           class="word-span"
           :class="{ tappable: aw.pinyin !== null, 'drag-selected': isInDragRange(idx) }"
           :data-testid="aw.pinyin !== null ? 'tappable-word' : undefined"
+          :data-word-idx="idx"
           @click="aw.pinyin !== null ? handleWordTap(aw, $event, idx) : undefined"
-          @pointerdown.prevent="handlePointerDown(idx)"
-          @pointermove="handlePointerMove(idx)"
-          @pointerup="handlePointerUp($event)"
+          @pointerdown="handlePointerDown(idx)"
         >{{ aw.word }}</span>
       </div>
 
@@ -255,6 +295,9 @@ function isInDragRange(idx: number): boolean {
 
 .word-span {
   cursor: default;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .word-span.tappable {
