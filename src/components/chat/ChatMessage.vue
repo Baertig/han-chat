@@ -268,20 +268,22 @@ function isInDragRange(idx: number): boolean {
 }
 
 .is-user .bubble {
-  background: #6366f1;
-  color: white;
+  background: var(--color-brand-primary);
+  color: #FFFFFF;
   border-bottom-right-radius: 4px;
 }
 
 .is-assistant .bubble {
-  background: #f3f4f6;
-  color: #1f2937;
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
   border-bottom-left-radius: 4px;
 }
 
 .content {
-  font-size: 15px;
+  font-size: var(--text-size-base);
   line-height: 1.5;
+  font-family: var(--font-chinese);
+  white-space: pre-wrap;
 }
 
 .content.shimmer {
@@ -302,21 +304,21 @@ function isInDragRange(idx: number): boolean {
 
 .word-span.tappable {
   cursor: pointer;
-  border-bottom: 1px dashed #9ca3af;
+  border-bottom: 1px dashed var(--color-text-muted);
 }
 
 .word-span.tappable:hover {
-  background: rgba(99, 102, 241, 0.1);
+  background: color-mix(in srgb, var(--color-accent) 15%, transparent);
   border-radius: 2px;
 }
 
 .word-span.drag-selected {
-  background: rgba(99, 102, 241, 0.2);
+  background: color-mix(in srgb, var(--color-accent) 25%, transparent);
   border-radius: 2px;
 }
 
 .timestamp {
-  font-size: 11px;
+  font-size: calc(var(--text-size-base) - 5px);
   opacity: 0.6;
   margin-top: 4px;
 }

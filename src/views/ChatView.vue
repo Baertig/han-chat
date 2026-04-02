@@ -5,6 +5,7 @@ import { useConversationsStore } from '@/stores/conversations'
 import { usePersonasStore } from '@/stores/personas'
 import { useSettingsStore } from '@/stores/settings'
 import { chatReply, translateMessage, grammarFeedback } from '@/services/openrouter'
+import { ArrowLeft } from 'lucide-vue-next'
 import ChatMessage from '@/components/chat/ChatMessage.vue'
 import ChatInput from '@/components/chat/ChatInput.vue'
 import AvatarPlaceholder from '@/components/common/AvatarPlaceholder.vue'
@@ -140,7 +141,7 @@ async function handleRetry() {
   <div class="chat-view">
     <header class="chat-header">
       <button class="back-btn" data-testid="back-btn" @click="router.push('/')">
-        ←
+        <ArrowLeft :size="20" />
       </button>
       <AvatarPlaceholder :name="personaName" :size="32" />
       <span class="persona-name" data-testid="persona-name">{{ personaName }}</span>
@@ -181,6 +182,9 @@ async function handleRetry() {
   display: flex;
   flex-direction: column;
   height: 100dvh;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  width: 100%;
 }
 
 .chat-header {
@@ -188,8 +192,8 @@ async function handleRetry() {
   align-items: center;
   gap: 10px;
   padding: 12px 16px;
-  border-bottom: 1px solid #e5e7eb;
-  background: white;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-surface);
   flex-shrink: 0;
 }
 
@@ -199,6 +203,7 @@ async function handleRetry() {
   font-size: 20px;
   cursor: pointer;
   padding: 4px 8px;
+  color: var(--color-text-main);
 }
 
 .persona-name {
@@ -217,7 +222,7 @@ async function handleRetry() {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9ca3af;
+  color: var(--color-text-muted);
 }
 
 .chat-error {
@@ -225,15 +230,15 @@ async function handleRetry() {
   align-items: center;
   justify-content: space-between;
   padding: 10px 16px;
-  background: #fef2f2;
-  border-top: 1px solid #fecaca;
+  background: var(--color-status-error);
+  border-top: 1px solid var(--color-border);
   font-size: 13px;
-  color: #991b1b;
+  color: var(--color-text-main);
 }
 
 .retry-btn {
-  background: #ef4444;
-  color: white;
+  background: var(--color-accent);
+  color: #FFFFFF;
   border: none;
   border-radius: 6px;
   padding: 6px 12px;

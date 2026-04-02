@@ -10,23 +10,38 @@ const emit = defineEmits<{
 }>()
 
 const text = ref('')
+const textareaRef = ref<HTMLTextAreaElement | null>(null)
+
+function autoResize() {
+  const el = textareaRef.value
+  if (!el) return
+  el.style.height = 'auto'
+  el.style.height = el.scrollHeight + 'px'
+}
 
 function handleSend() {
   const trimmed = text.value.trim()
   if (!trimmed || props.disabled) return
   emit('send', trimmed)
   text.value = ''
+  // Reset textarea height after send
+  const el = textareaRef.value
+  if (el) {
+    el.style.height = 'auto'
+  }
 }
 </script>
 
 <template>
   <form class="chat-input" @submit.prevent="handleSend" data-testid="chat-input-form">
     <textarea
+      ref="textareaRef"
       v-model="text"
       placeholder="Type a message..."
       rows="1"
       data-testid="chat-input"
       @keydown.enter.exact.prevent="handleSend"
+      @input="autoResize"
     />
     <button
       type="submit"
@@ -43,25 +58,34 @@ function handleSend() {
   display: flex;
   gap: 8px;
   padding: 12px;
-  border-top: 1px solid #e5e7eb;
-  background: white;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg-surface);
 }
 
 textarea {
   flex: 1;
   resize: none;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 8px 12px;
   font-size: 16px;
   font-family: inherit;
   line-height: 1.4;
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
+  max-height: calc(16px * 1.4 * 3 + 16px + 2px);
+  overflow-y: auto;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
 }
 
 button {
   padding: 8px 16px;
-  background: #6366f1;
-  color: white;
+  background: var(--color-accent);
+  color: #FFFFFF;
   border: none;
   border-radius: 8px;
   font-size: 14px;

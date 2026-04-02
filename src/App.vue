@@ -1,14 +1,26 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import '@/assets/theme.css'
+import '@/assets/main.css'
+import { onMounted, ref, watch } from 'vue'
 import { RouterView } from 'vue-router'
 import { isCredentialApiAvailable } from '@/services/credentials'
-import { useSettingsStore } from '@/stores/settings'
+import { useSettingsStore, TEXT_SIZE_MAP } from '@/stores/settings'
 
 const credentialUnavailable = ref(false)
 const settingsStore = useSettingsStore()
 
+function applyTextSize() {
+  document.documentElement.style.setProperty(
+    '--text-size-base',
+    TEXT_SIZE_MAP[settingsStore.textSize],
+  )
+}
+
+watch(() => settingsStore.textSize, applyTextSize)
+
 onMounted(async () => {
   credentialUnavailable.value = !isCredentialApiAvailable()
+  applyTextSize()
   await settingsStore.init()
 })
 </script>
@@ -22,11 +34,11 @@ onMounted(async () => {
 
 <style>
 .credential-banner {
-  background: #fee2e2;
-  border-bottom: 1px solid #ef4444;
+  background: var(--color-status-error);
+  border-bottom: 1px solid var(--color-border);
   padding: 10px 16px;
-  font-size: 13px;
-  color: #991b1b;
+  font-size: calc(var(--text-size-base) - 3px);
+  color: var(--color-text-main);
   text-align: center;
 }
 </style>

@@ -47,26 +47,26 @@
 
 > **Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T006 [US1] Write E2E test for light mode color scheme verification in `tests/e2e/theming.spec.ts` — verify `--color-bg-main` resolves to light mode value on page load, verify body background matches, verify text color matches `--color-text-main`
-- [ ] T007 [US1] Write E2E test for dark mode color scheme verification in `tests/e2e/theming.spec.ts` — emulate dark mode via `page.emulateMedia({ colorScheme: 'dark' })`, verify `--color-bg-main` resolves to dark mode value, verify body background and text colors update
-- [ ] T008 [US1] Write E2E test for consistent token usage across all screens in `tests/e2e/theming.spec.ts` — navigate to home, chat, settings, persona list; verify each screen's background and text use theme tokens in both light and dark mode
-- [ ] T009 [US1] Write E2E test for live mode switching in `tests/e2e/theming.spec.ts` — start in light mode, switch to dark mode via emulation, verify colors update without page reload
+- [x] T006 [US1] Write E2E test for light mode color scheme verification in `tests/e2e/theming.spec.ts` — verify `--color-bg-main` resolves to light mode value on page load, verify body background matches, verify text color matches `--color-text-main`
+- [x] T007 [US1] Write E2E test for dark mode color scheme verification in `tests/e2e/theming.spec.ts` — emulate dark mode via `page.emulateMedia({ colorScheme: 'dark' })`, verify `--color-bg-main` resolves to dark mode value, verify body background and text colors update
+- [x] T008 [US1] Write E2E test for consistent token usage across all screens in `tests/e2e/theming.spec.ts` — navigate to home, chat, settings, persona list; verify each screen's background and text use theme tokens in both light and dark mode
+- [x] T009 [US1] Write E2E test for live mode switching in `tests/e2e/theming.spec.ts` — start in light mode, switch to dark mode via emulation, verify colors update without page reload
 
 ### Implementation for User Story 1
 
-- [ ] T010 [P] [US1] Replace all hardcoded colors in `src/views/HomeView.vue` with CSS custom property references — backgrounds use `var(--color-bg-main)` / `var(--color-bg-surface)`, text uses `var(--color-text-main)` / `var(--color-text-muted)`, borders use `var(--color-border)`, buttons/links use `var(--color-accent)`
-- [ ] T011 [P] [US1] Replace all hardcoded colors in `src/views/ChatView.vue` with CSS custom property references — header background, text colors, borders, button colors all reference theme tokens
-- [ ] T012 [P] [US1] Replace all hardcoded colors in `src/views/SettingsView.vue` with CSS custom property references
-- [ ] T013 [P] [US1] Replace all hardcoded colors in `src/views/PersonaListView.vue` with CSS custom property references
-- [ ] T014 [P] [US1] Replace all hardcoded colors in `src/components/chat/ChatMessage.vue` — user bubble: `var(--color-brand-primary)` bg with white text; assistant bubble: `var(--color-bg-surface)` bg with `var(--color-text-main)` text; timestamp uses `var(--color-text-muted)`
-- [ ] T015 [P] [US1] Replace all hardcoded colors in `src/components/chat/ChatInput.vue` — input border: `var(--color-border)`, focus border: `var(--color-accent)`, text: `var(--color-text-main)`, background: `var(--color-bg-surface)`, send button: `var(--color-accent)`
-- [ ] T016 [P] [US1] Replace all hardcoded colors in `src/components/chat/FeedbackIcon.vue` — success: `var(--color-status-success)`, error: `var(--color-status-error)`, pending spinner: `var(--color-text-muted)`
-- [ ] T017 [P] [US1] Replace all hardcoded colors in `src/components/chat/WordPopup.vue` — background: `var(--color-bg-surface)`, text: `var(--color-text-main)`, borders: `var(--color-border)`, pinyin/highlights: `var(--color-accent)`
-- [ ] T018 [P] [US1] Replace all hardcoded colors in `src/components/chat/CorrectionDialog.vue` — dialog background: `var(--color-bg-surface)`, overlay: `rgba(0, 0, 0, 0.4)`, text: `var(--color-text-main)`, borders: `var(--color-border)`
-- [ ] T019 [P] [US1] Replace all hardcoded colors in `src/components/persona/PersonaCard.vue` — background: `var(--color-bg-surface)`, text: `var(--color-text-main)`, border: `var(--color-border)`, hover: `var(--color-accent)`
-- [ ] T020 [P] [US1] Replace all hardcoded colors in `src/components/persona/PersonaPicker.vue` — background: `var(--color-bg-surface)`, overlay: `rgba(0, 0, 0, 0.4)`, text: `var(--color-text-main)`, border: `var(--color-border)`
-- [ ] T021 [P] [US1] Replace all hardcoded colors in `src/components/persona/PersonaForm.vue` — background: `var(--color-bg-main)`, inputs: `var(--color-bg-surface)`, labels: `var(--color-text-main)`, borders: `var(--color-border)`, buttons: `var(--color-accent)`
-- [ ] T022 [P] [US1] Replace all hardcoded colors in `src/components/common/AvatarPlaceholder.vue` — avatar background: `var(--color-brand-primary)`, text: white
+- [x] T010 [P] [US1] Replace all hardcoded colors in `src/views/HomeView.vue` with CSS custom property references — backgrounds use `var(--color-bg-main)` / `var(--color-bg-surface)`, text uses `var(--color-text-main)` / `var(--color-text-muted)`, borders use `var(--color-border)`, buttons/links use `var(--color-accent)`
+- [x] T011 [P] [US1] Replace all hardcoded colors in `src/views/ChatView.vue` with CSS custom property references — header background, text colors, borders, button colors all reference theme tokens
+- [x] T012 [P] [US1] Replace all hardcoded colors in `src/views/SettingsView.vue` with CSS custom property references
+- [x] T013 [P] [US1] Replace all hardcoded colors in `src/views/PersonaListView.vue` with CSS custom property references
+- [x] T014 [P] [US1] Replace all hardcoded colors in `src/components/chat/ChatMessage.vue` — user bubble: `var(--color-brand-primary)` bg with white text; assistant bubble: `var(--color-bg-surface)` bg with `var(--color-text-main)` text; timestamp uses `var(--color-text-muted)`
+- [x] T015 [P] [US1] Replace all hardcoded colors in `src/components/chat/ChatInput.vue` — input border: `var(--color-border)`, focus border: `var(--color-accent)`, text: `var(--color-text-main)`, background: `var(--color-bg-surface)`, send button: `var(--color-accent)`
+- [x] T016 [P] [US1] Replace all hardcoded colors in `src/components/chat/FeedbackIcon.vue` — success: `var(--color-status-success)`, error: `var(--color-status-error)`, pending spinner: `var(--color-text-muted)`
+- [x] T017 [P] [US1] Replace all hardcoded colors in `src/components/chat/WordPopup.vue` — background: `var(--color-bg-surface)`, text: `var(--color-text-main)`, borders: `var(--color-border)`, pinyin/highlights: `var(--color-accent)`
+- [x] T018 [P] [US1] Replace all hardcoded colors in `src/components/chat/CorrectionDialog.vue` — dialog background: `var(--color-bg-surface)`, overlay: `rgba(0, 0, 0, 0.4)`, text: `var(--color-text-main)`, borders: `var(--color-border)`
+- [x] T019 [P] [US1] Replace all hardcoded colors in `src/components/persona/PersonaCard.vue` — background: `var(--color-bg-surface)`, text: `var(--color-text-main)`, border: `var(--color-border)`, hover: `var(--color-accent)`
+- [x] T020 [P] [US1] Replace all hardcoded colors in `src/components/persona/PersonaPicker.vue` — background: `var(--color-bg-surface)`, overlay: `rgba(0, 0, 0, 0.4)`, text: `var(--color-text-main)`, border: `var(--color-border)`
+- [x] T021 [P] [US1] Replace all hardcoded colors in `src/components/persona/PersonaForm.vue` — background: `var(--color-bg-main)`, inputs: `var(--color-bg-surface)`, labels: `var(--color-text-main)`, borders: `var(--color-border)`, buttons: `var(--color-accent)`
+- [x] T022 [P] [US1] Replace all hardcoded colors in `src/components/common/AvatarPlaceholder.vue` — avatar background: `var(--color-brand-primary)`, text: white
 
 **Checkpoint**: All screens render with the cohesive color palette. Dark mode works automatically. Zero hardcoded color values remain in components. E2E tests pass.
 

@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useConversationsStore } from '@/stores/conversations'
 import { usePersonasStore } from '@/stores/personas'
+import { Settings } from 'lucide-vue-next'
 import PersonaPicker from '@/components/persona/PersonaPicker.vue'
 import AvatarPlaceholder from '@/components/common/AvatarPlaceholder.vue'
 
@@ -67,7 +68,7 @@ function formatDate(date: Date): string {
         class="icon-btn"
         @click="router.push('/settings')"
       >
-        ⚙
+        <Settings :size="20" />
       </button>
     </header>
 
@@ -124,6 +125,9 @@ function formatDate(date: Date): string {
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  width: 100%;
 }
 
 .home-header {
@@ -131,7 +135,7 @@ function formatDate(date: Date): string {
   align-items: center;
   justify-content: space-between;
   padding: 16px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--color-border);
 }
 
 h1 {
@@ -145,6 +149,7 @@ h1 {
   font-size: 20px;
   cursor: pointer;
   padding: 4px;
+  color: var(--color-text-main);
 }
 
 .actions {
@@ -157,17 +162,18 @@ h1 {
   flex: 1;
   padding: 12px;
   border-radius: 10px;
-  border: 1px solid #d1d5db;
-  background: white;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
 }
 
 .action-btn.primary {
-  background: #6366f1;
-  color: white;
-  border-color: #6366f1;
+  background: var(--color-accent);
+  color: #FFFFFF;
+  border-color: var(--color-accent);
 }
 
 .empty-state {
@@ -175,7 +181,7 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9ca3af;
+  color: var(--color-text-muted);
   padding: 32px;
   text-align: center;
 }
@@ -192,14 +198,15 @@ h1 {
   width: 100%;
   padding: 12px 16px;
   border: none;
-  border-bottom: 1px solid #f3f4f6;
-  background: white;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-surface);
   cursor: pointer;
   text-align: left;
+  color: var(--color-text-main);
 }
 
 .conversation-item:hover {
-  background: #f9fafb;
+  background: var(--color-bg-main);
 }
 
 .conv-info {
@@ -220,13 +227,13 @@ h1 {
 
 .conv-time {
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--color-text-muted);
   flex-shrink: 0;
 }
 
 .conv-preview {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--color-text-muted);
   margin-top: 2px;
   overflow: hidden;
   text-overflow: ellipsis;

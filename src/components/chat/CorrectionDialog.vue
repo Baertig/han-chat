@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { computeDiff } from '@/services/diff'
+import { X } from 'lucide-vue-next'
 import type { FeedbackResult } from '@/types'
 
 const props = defineProps<{
@@ -30,7 +31,7 @@ const diffSegments = computed(() => {
         data-testid="correction-close"
         aria-label="Close"
         @click="$emit('dismiss')"
-      >&times;</button>
+      ><X :size="18" /></button>
 
       <!-- Green mode: correct -->
       <template v-if="feedback.isCorrect">
@@ -75,12 +76,13 @@ const diffSegments = computed(() => {
 }
 
 .dialog {
-  background: white;
+  background: var(--color-bg-surface);
   border-radius: 12px;
   padding: 24px;
   max-width: 480px;
   width: 90%;
   position: relative;
+  color: var(--color-text-main);
 }
 
 .close-button {
@@ -91,14 +93,14 @@ const diffSegments = computed(() => {
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--color-text-muted);
   line-height: 1;
 }
 
 .heading {
   font-size: 14px;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--color-text-muted);
   margin: 0 0 8px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -114,15 +116,16 @@ const diffSegments = computed(() => {
   font-size: 16px;
   line-height: 1.6;
   margin: 0 0 12px;
+  font-family: var(--font-chinese);
 }
 
 .removed {
-  color: #ef4444;
+  color: var(--color-status-error);
   text-decoration: line-through;
 }
 
 .added {
-  color: #22c55e;
+  color: var(--color-status-success);
   font-weight: 600;
 }
 </style>

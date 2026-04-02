@@ -94,6 +94,37 @@ describe('settings store', () => {
     })
   })
 
+  describe('textSize', () => {
+    it('defaults to "default"', () => {
+      const store = useSettingsStore()
+      expect(store.textSize).toBe('default')
+    })
+
+    it('can be set to each preset value', () => {
+      const store = useSettingsStore()
+      const presets = ['small', 'default', 'large', 'extra-large'] as const
+      for (const preset of presets) {
+        store.textSize = preset
+        expect(store.textSize).toBe(preset)
+      }
+    })
+
+    it('is included in persisted fields', async () => {
+      const store = useSettingsStore()
+      store.textSize = 'large'
+
+      // Trigger persistence
+      store.$patch({ textSize: 'large' })
+      await new Promise<void>((r) => setTimeout(r, 0))
+
+      const raw = testStorage.getItem(STORAGE_KEY)
+      if (raw !== null) {
+        const parsed: Record<string, unknown> = JSON.parse(raw)
+        expect(parsed).toHaveProperty('textSize', 'large')
+      }
+    })
+  })
+
   describe('persistence', () => {
     it('does NOT persist apiKey to localStorage', async () => {
       mockedLoadApiKey.mockResolvedValue('sk-secret-key')

@@ -32,15 +32,16 @@ const emit = defineEmits<{
   gap: 12px;
   padding: 12px;
   width: 100%;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border);
   border-radius: 12px;
-  background: white;
+  background: var(--color-bg-surface);
   cursor: pointer;
   text-align: left;
+  color: var(--color-text-main);
 }
 
 .persona-card:hover {
-  background: #f9fafb;
+  background: var(--color-bg-main);
 }
 
 .name {
@@ -50,7 +51,7 @@ const emit = defineEmits<{
 
 .prompt-preview {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--color-text-muted);
   margin-top: 2px;
 }
 </style>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { X } from 'lucide-vue-next'
 
 const props = defineProps<{
   word: string
@@ -63,7 +64,7 @@ onUnmounted(() => {
       data-testid="popup-close"
       aria-label="Close"
       @click.stop="emit('dismiss')"
-    >&times;</button>
+    ><X :size="14" /></button>
     <div v-if="loading" class="popup-loading" data-testid="popup-loading">
       Loading...
     </div>
@@ -81,8 +82,9 @@ onUnmounted(() => {
 <style scoped>
 .word-popup {
   position: relative;
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
   padding: 8px 14px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -103,7 +105,7 @@ onUnmounted(() => {
   font-size: 14px;
   line-height: 18px;
   padding: 0;
-  color: #9ca3af;
+  color: var(--color-text-muted);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -111,35 +113,36 @@ onUnmounted(() => {
 }
 
 .popup-close:hover {
-  color: #6b7280;
-  background: rgba(0, 0, 0, 0.05);
+  color: var(--color-text-main);
+  background: color-mix(in srgb, var(--color-text-muted) 10%, transparent);
 }
 
 .popup-word {
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 4px;
+  font-family: var(--font-chinese);
 }
 
 .popup-pinyin {
   font-size: 14px;
-  color: #6366f1;
+  color: var(--color-accent);
   margin-bottom: 2px;
 }
 
 .popup-translation {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--color-text-muted);
 }
 
 .popup-no-translation {
   font-size: 13px;
-  color: #9ca3af;
+  color: var(--color-text-muted);
   font-style: italic;
 }
 
 .popup-loading {
   font-size: 13px;
-  color: #9ca3af;
+  color: var(--color-text-muted);
 }
 </style>

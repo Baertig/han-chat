@@ -49,8 +49,8 @@ import { computed } from 'vue'
 
 .avatar-placeholder {
   border-radius: 50%;
-  background: #6366f1;
-  color: white;
+  background: var(--color-brand-primary);
+  color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;

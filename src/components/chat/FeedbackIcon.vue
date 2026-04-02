@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Loader2, AlertTriangle, Check, X } from 'lucide-vue-next'
+
 defineProps<{
   feedbackStatus: 'pending' | 'resolved' | 'error' | null
   isCorrect: boolean | null
@@ -15,33 +17,33 @@ defineEmits<{
     class="feedback-icon"
     @click="$emit('click')"
   >
-    <span
+    <Loader2
       v-if="feedbackStatus === 'pending'"
+      :size="16"
       class="spinner"
       data-testid="feedback-loading"
-      aria-label="Loading feedback"
-    >&#x27F3;</span>
+    />
 
-    <span
+    <AlertTriangle
       v-else-if="feedbackStatus === 'error'"
+      :size="16"
       class="error"
       data-testid="feedback-error"
-      aria-label="Feedback error"
-    >&#x26A0;</span>
+    />
 
-    <span
+    <Check
       v-else-if="feedbackStatus === 'resolved' && isCorrect === true"
+      :size="16"
       class="correct"
       data-testid="feedback-correct"
-      aria-label="Correct"
-    >&#x2713;</span>
+    />
 
-    <span
+    <X
       v-else-if="feedbackStatus === 'resolved' && isCorrect === false"
+      :size="16"
       class="incorrect"
       data-testid="feedback-incorrect"
-      aria-label="Incorrect"
-    >&#x2717;</span>
+    />
   </button>
 </template>
 
@@ -60,7 +62,7 @@ defineEmits<{
 
 .spinner {
   animation: spin 1s linear infinite;
-  color: #6b7280;
+  color: var(--color-text-muted);
 }
 
 @keyframes spin {
@@ -69,14 +71,14 @@ defineEmits<{
 }
 
 .error {
-  color: #9ca3af;
+  color: var(--color-text-muted);
 }
 
 .correct {
-  color: #22c55e;
+  color: var(--color-status-success);
 }
 
 .incorrect {
-  color: #ef4444;
+  color: var(--color-status-error);
 }
 </style>

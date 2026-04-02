@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useSettingsStore } from '@/stores/settings'
+import { useSettingsStore, type TextSizePreset } from '@/stores/settings'
 import { saveApiKey, isCredentialApiAvailable } from '@/services/credentials'
+import { ArrowLeft } from 'lucide-vue-next'
 
 const route = useRoute()
 const router = useRouter()
@@ -42,7 +43,7 @@ async function handleSaveApiKey() {
 <template>
   <div class="settings-view">
     <header class="settings-header">
-      <button class="back-btn" @click="router.push('/')">←</button>
+      <button class="back-btn" @click="router.push('/')"><ArrowLeft :size="20" /></button>
       <h1>Settings</h1>
     </header>
 
@@ -107,6 +108,36 @@ async function handleSaveApiKey() {
           <input v-model="settingsStore.phraseLookupModel" data-testid="phrase-model-input" />
         </label>
       </section>
+
+      <section class="setting-group">
+        <h2>Text Size</h2>
+        <div class="text-size-control" data-testid="text-size-control">
+          <button
+            class="text-size-option"
+            :class="{ active: settingsStore.textSize === 'small' }"
+            data-testid="text-size-small"
+            @click="settingsStore.textSize = 'small'"
+          >Small</button>
+          <button
+            class="text-size-option"
+            :class="{ active: settingsStore.textSize === 'default' }"
+            data-testid="text-size-default"
+            @click="settingsStore.textSize = 'default'"
+          >Default</button>
+          <button
+            class="text-size-option"
+            :class="{ active: settingsStore.textSize === 'large' }"
+            data-testid="text-size-large"
+            @click="settingsStore.textSize = 'large'"
+          >Large</button>
+          <button
+            class="text-size-option"
+            :class="{ active: settingsStore.textSize === 'extra-large' }"
+            data-testid="text-size-extra-large"
+            @click="settingsStore.textSize = 'extra-large'"
+          >Extra Large</button>
+        </div>
+      </section>
     </div>
   </div>
 </template>
@@ -116,6 +147,9 @@ async function handleSaveApiKey() {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  width: 100%;
 }
 
 .settings-header {
@@ -123,7 +157,7 @@ async function handleSaveApiKey() {
   align-items: center;
   gap: 10px;
   padding: 12px 16px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .back-btn {
@@ -132,6 +166,7 @@ async function handleSaveApiKey() {
   font-size: 20px;
   cursor: pointer;
   padding: 4px 8px;
+  color: var(--color-text-main);
 }
 
 h1 {
@@ -147,21 +182,21 @@ h1 {
 }
 
 .no-key-banner {
-  background: #fef3c7;
-  border: 1px solid #f59e0b;
+  background: var(--color-brand-secondary);
+  border: 1px solid var(--color-accent);
   border-radius: 8px;
   padding: 12px;
   font-size: 14px;
-  color: #92400e;
+  color: var(--color-text-main);
 }
 
 .warning-banner {
-  background: #fee2e2;
-  border: 1px solid #ef4444;
+  background: var(--color-status-error);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 12px;
   font-size: 14px;
-  color: #991b1b;
+  color: var(--color-text-main);
 }
 
 .setting-group h2 {
@@ -179,9 +214,11 @@ h1 {
 input {
   flex: 1;
   padding: 8px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   font-size: 14px;
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
 }
 
 input[type="number"] {
@@ -190,8 +227,8 @@ input[type="number"] {
 
 button {
   padding: 8px 16px;
-  background: #6366f1;
-  color: white;
+  background: var(--color-accent);
+  color: #FFFFFF;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -208,12 +245,35 @@ label {
   flex-direction: column;
   gap: 4px;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--color-text-muted);
   margin-bottom: 8px;
 }
 
 .hint {
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--color-text-muted);
+}
+
+.text-size-control {
+  display: flex;
+  gap: 6px;
+}
+
+.text-size-option {
+  flex: 1;
+  padding: 8px 4px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
+  font-size: 13px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.text-size-option.active {
+  background: var(--color-accent);
+  color: #FFFFFF;
+  border-color: var(--color-accent);
 }
 </style>

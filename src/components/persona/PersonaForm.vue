@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { usePersonasStore } from '@/stores/personas'
 import { resizeImage } from '@/services/image-resize'
+import { ArrowLeft } from 'lucide-vue-next'
 
 const router = useRouter()
 const personasStore = usePersonasStore()
@@ -66,7 +67,7 @@ async function handleSave() {
 <template>
   <div class="persona-form-view">
     <header class="form-header">
-      <button class="back-btn" @click="router.back()">←</button>
+      <button class="back-btn" @click="router.back()"><ArrowLeft :size="20" /></button>
       <h1>New Persona</h1>
     </header>
 
@@ -132,6 +133,9 @@ async function handleSave() {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  width: 100%;
 }
 
 .form-header {
@@ -139,7 +143,7 @@ async function handleSave() {
   align-items: center;
   gap: 10px;
   padding: 12px 16px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .back-btn {
@@ -147,6 +151,7 @@ async function handleSave() {
   border: none;
   font-size: 20px;
   cursor: pointer;
+  color: var(--color-text-main);
 }
 
 h1 {
@@ -170,16 +175,18 @@ h1 {
 label {
   font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: var(--color-text-main);
 }
 
 input[type="text"],
 textarea {
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   font-size: 15px;
   font-family: inherit;
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
 }
 
 textarea {
@@ -188,17 +195,17 @@ textarea {
 
 .char-count {
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--color-text-muted);
   text-align: right;
 }
 
 .char-count.over {
-  color: #ef4444;
+  color: var(--color-status-error);
 }
 
 .error {
   font-size: 13px;
-  color: #ef4444;
+  color: var(--color-status-error);
 }
 
 .image-preview {
@@ -215,8 +222,8 @@ input[type="file"] {
 
 .save-btn {
   padding: 12px;
-  background: #6366f1;
-  color: white;
+  background: var(--color-accent);
+  color: #FFFFFF;
   border: none;
   border-radius: 10px;
   font-size: 16px;

@@ -39,13 +39,14 @@ const emit = defineEmits<{
 }
 
 .persona-picker {
-  background: white;
+  background: var(--color-bg-surface);
   border-radius: 16px;
   padding: 24px;
   width: 90%;
   max-width: 400px;
   max-height: 80vh;
   overflow-y: auto;
+  color: var(--color-text-main);
 }
 
 h2 {
@@ -63,9 +64,10 @@ h2 {
   margin-top: 16px;
   width: 100%;
   padding: 10px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: white;
+  background: var(--color-bg-surface);
+  color: var(--color-text-main);
   cursor: pointer;
   font-size: 14px;
 }

@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router'
 import { usePersonasStore } from '@/stores/personas'
 import { useConversationsStore } from '@/stores/conversations'
+import { ArrowLeft } from 'lucide-vue-next'
 import PersonaCard from '@/components/persona/PersonaCard.vue'
 
 const router = useRouter()
@@ -17,7 +18,7 @@ function startConversation(personaId: string) {
 <template>
   <div class="persona-list-view">
     <header class="list-header">
-      <button class="back-btn" @click="router.push('/')">←</button>
+      <button class="back-btn" @click="router.push('/')"><ArrowLeft :size="20" /></button>
       <h1>Personas</h1>
     </header>
 
@@ -51,6 +52,9 @@ function startConversation(personaId: string) {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  width: 100%;
 }
 
 .list-header {
@@ -58,7 +62,7 @@ function startConversation(personaId: string) {
   align-items: center;
   gap: 10px;
   padding: 12px 16px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .back-btn {
@@ -66,6 +70,7 @@ function startConversation(personaId: string) {
   border: none;
   font-size: 20px;
   cursor: pointer;
+  color: var(--color-text-main);
 }
 
 h1 {
@@ -80,8 +85,8 @@ h1 {
 .new-persona-btn {
   width: 100%;
   padding: 12px;
-  background: #6366f1;
-  color: white;
+  background: var(--color-accent);
+  color: #FFFFFF;
   border: none;
   border-radius: 10px;
   font-size: 14px;
@@ -94,7 +99,7 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9ca3af;
+  color: var(--color-text-muted);
   padding: 32px;
 }
 
