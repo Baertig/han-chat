@@ -234,8 +234,8 @@ interface AppSettings {
   contextWindowSize: number  // Default: 8; range: 1–50; user-configurable
   chatModel: string          // Default: 'deepseek/deepseek-v3.2'
   feedbackModel: string      // Default: 'deepseek/deepseek-v3.2'
-  translationModel: string   // Default: 'openai/gpt-oss-120b'
-  phraseLookupModel: string  // Default: 'openai/gpt-oss-120b'
+  translationModel: string   // Default: 'google/gemini-2.5-flash-lite'
+  phraseLookupModel: string  // Default: 'google/gemini-2.5-flash-lite'
   apiKey: string | null       // Loaded once at app start from Credential Management API
 }
 ```

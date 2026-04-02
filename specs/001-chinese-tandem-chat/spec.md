@@ -241,7 +241,7 @@ with a diff dialog showing the correction.
   string independently for each of the four call types: chat reply, grammar
   feedback, word translation, and phrase lookup. Each MUST default to
   `deepseek/deepseek-v3.2` for chat reply and grammar feedback,
-  `openai/gpt-oss-120b` for word translation and phrase lookup) and MUST be
+  `google/gemini-2.5-flash-lite` for word translation and phrase lookup) and MUST be
   persisted in browser-native local storage.
 
 ### Key Entities

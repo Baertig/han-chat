@@ -42,7 +42,7 @@
 > **Write FIRST, ensure they FAIL before implementation**
 
 - [x] T010 [P] Unit test for credentials service in `tests/unit/services/credentials.test.ts`: test `loadApiKey()` returns key from mocked PasswordCredential, returns null when unavailable, `saveApiKey()` stores credential, `isCredentialApiAvailable()` returns boolean
-- [x] T011 [P] Unit test for settings store in `tests/unit/stores/settings.test.ts`: test `init()` loads API key via credentials service into reactive state, `apiKey` excluded from localStorage persistence, default values for contextWindowSize (8) and model strings (deepseek/deepseek-v3.2 for chat/feedback, openai/gpt-oss-120b for translation/phrase), Date deserialisation on hydration
+- [x] T011 [P] Unit test for settings store in `tests/unit/stores/settings.test.ts`: test `init()` loads API key via credentials service into reactive state, `apiKey` excluded from localStorage persistence, default values for contextWindowSize (8) and model strings (deepseek/deepseek-v3.2 for chat/feedback, google/gemini-2.5-flash-lite for translation/phrase), Date deserialisation on hydration
 - [x] T012 [P] Unit test for openrouter base service in `tests/unit/services/openrouter.test.ts`: test `chatReply()` reads apiKey from settings store, sends correct payload per `openrouter-chat.md` contract with sliding window of last N messages, handles errors (network, 4xx, 5xx, empty choices)
 - [x] T013 [P] Unit test for personas store in `tests/unit/stores/personas.test.ts`: test `addPersona()` generates UUID + Date, `getById()`, persistence to localStorage key `han-chat-personas`, Date hydration (createdAt revived as Date)
 - [x] T014 [P] Unit test for conversations store in `tests/unit/stores/conversations.test.ts`: test `createConversation()` generates UUID + Date, `addMessage()` appends to `conversation.messages[]` and updates `updatedAt`, `getConversation()`, Date hydration (createdAt/updatedAt/timestamp revived as Date), persistence to `han-chat-conversations`
@@ -229,7 +229,7 @@
 
 ### Implementation for Settings
 
-- [x] T075 Implement SettingsView in `src/views/SettingsView.vue`: API key input + save (calls `credentials.saveApiKey()` and updates `settingsStore.apiKey`), context window slider (1–50, default 8), 4 model string inputs (defaults: deepseek/deepseek-v3.2 for chat/feedback, openai/gpt-oss-120b for translation/phrase), Credential API unavailable banner, toast on successful save
+- [x] T075 Implement SettingsView in `src/views/SettingsView.vue`: API key input + save (calls `credentials.saveApiKey()` and updates `settingsStore.apiKey`), context window slider (1–50, default 8), 4 model string inputs (defaults: deepseek/deepseek-v3.2 for chat/feedback, google/gemini-2.5-flash-lite for translation/phrase), Credential API unavailable banner, toast on successful save
 
 ---
 

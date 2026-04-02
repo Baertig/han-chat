@@ -29,7 +29,7 @@ Content-Type: application/json
 **Body**:
 ```json
 {
-  "model": "<settings.translationModel, default 'openai/gpt-oss-120b'>",
+  "model": "<settings.translationModel, default 'google/gemini-2.5-flash-lite'>",
   "response_format": {
     "type": "json_schema",
     "json_schema": {

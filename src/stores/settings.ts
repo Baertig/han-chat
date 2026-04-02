@@ -9,8 +9,8 @@ export const useSettingsStore = defineStore(
     const contextWindowSize = ref(8)
     const chatModel = ref('deepseek/deepseek-v3.2')
     const feedbackModel = ref('deepseek/deepseek-v3.2')
-    const translationModel = ref('openai/gpt-oss-120b')
-    const phraseLookupModel = ref('openai/gpt-oss-120b')
+    const translationModel = ref('google/gemini-2.5-flash-lite')
+    const phraseLookupModel = ref('google/gemini-2.5-flash-lite')
 
     async function init(): Promise<void> {
       apiKey.value = await loadApiKey()

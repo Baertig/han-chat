@@ -190,5 +190,5 @@ After completing all user story implementations, verify:
 
 **Supported models** (set per action in Settings):
 - `deepseek/deepseek-v3.2` — default for chat reply and grammar feedback
-- `openai/gpt-oss-120b` — default for word translation and phrase lookup
+- `google/gemini-2.5-flash-lite` — default for word translation and phrase lookup
 - Any model string from [openrouter.ai/models](https://openrouter.ai/models)

@@ -41,8 +41,8 @@ function mockSettingsStore(overrides: {
     chatModel: overrides.chatModel ?? 'openai/gpt-4o',
     contextWindowSize: overrides.contextWindowSize ?? 10,
     feedbackModel: overrides.feedbackModel ?? 'deepseek/deepseek-v3.2',
-    translationModel: overrides.translationModel ?? 'openai/gpt-oss-120b',
-    phraseLookupModel: overrides.phraseLookupModel ?? 'openai/gpt-oss-120b',
+    translationModel: overrides.translationModel ?? 'google/gemini-2.5-flash-lite',
+    phraseLookupModel: overrides.phraseLookupModel ?? 'google/gemini-2.5-flash-lite',
   }) as ReturnType<typeof useSettingsStore>)
 }
 
@@ -288,7 +288,7 @@ describe('translateMessage', () => {
       response_format: { type: string; json_schema: { name: string } }
     }
 
-    expect(body.model).toBe('openai/gpt-oss-120b')
+    expect(body.model).toBe('google/gemini-2.5-flash-lite')
     expect(body.messages[0]!.content).toContain('Chinese language translation assistant')
     expect(body.messages[1]!.content).toContain('你好')
     expect(body.response_format.json_schema.name).toBe('word_translations')
@@ -333,7 +333,7 @@ describe('translatePhrase', () => {
       response_format: { type: string; json_schema: { name: string } }
     }
 
-    expect(body.model).toBe('openai/gpt-oss-120b')
+    expect(body.model).toBe('google/gemini-2.5-flash-lite')
     expect(body.response_format.json_schema.name).toBe('phrase_lookup')
   })
 

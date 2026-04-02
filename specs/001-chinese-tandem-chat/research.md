@@ -57,7 +57,7 @@ npm create vue@latest han-chat
 
 **Endpoint**: `https://openrouter.ai/api/v1/chat/completions`
 **Auth header**: `Authorization: Bearer <key>`
-**Model param**: user-selectable model string (e.g., `openai/gpt-oss-120b`)
+**Model param**: user-selectable model string (e.g., `google/gemini-2.5-flash-lite`)
 
 **Four distinct call types** (see contracts/ for full schemas):
 1. **Chat reply** — conversational response using persona system prompt + last N messages

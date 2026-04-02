@@ -56,14 +56,14 @@ describe('settings store', () => {
       expect(store.feedbackModel).toBe('deepseek/deepseek-v3.2')
     })
 
-    it('has translationModel set to openai/gpt-oss-120b', () => {
+    it('has translationModel set to google/gemini-2.5-flash-lite', () => {
       const store = useSettingsStore()
-      expect(store.translationModel).toBe('openai/gpt-oss-120b')
+      expect(store.translationModel).toBe('google/gemini-2.5-flash-lite')
     })
 
-    it('has phraseLookupModel set to openai/gpt-oss-120b', () => {
+    it('has phraseLookupModel set to google/gemini-2.5-flash-lite', () => {
       const store = useSettingsStore()
-      expect(store.phraseLookupModel).toBe('openai/gpt-oss-120b')
+      expect(store.phraseLookupModel).toBe('google/gemini-2.5-flash-lite')
     })
 
     it('has apiKey as null', () => {
