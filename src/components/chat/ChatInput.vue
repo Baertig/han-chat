@@ -11,12 +11,20 @@ const emit = defineEmits<{
 
 const text = ref('')
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
+const isMobile = window.matchMedia('(pointer: coarse)').matches
 
 function autoResize() {
   const el = textareaRef.value
   if (!el) return
   el.style.height = 'auto'
   el.style.height = el.scrollHeight + 'px'
+}
+
+function handleEnterKey(event: KeyboardEvent) {
+  if (event.shiftKey) return
+  if (isMobile) return
+  event.preventDefault()
+  handleSend()
 }
 
 function handleSend() {
@@ -40,7 +48,7 @@ function handleSend() {
       placeholder="Type a message..."
       rows="1"
       data-testid="chat-input"
-      @keydown.enter.exact.prevent="handleSend"
+      @keydown.enter="handleEnterKey"
       @input="autoResize"
     />
     <button
