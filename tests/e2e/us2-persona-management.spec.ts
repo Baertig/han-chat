@@ -37,7 +37,7 @@ test.describe.serial('US-2 — Persona Management', () => {
   test('AS1 — Form fields: persona creation form shows all required fields', async ({
     page,
   }) => {
-    await page.goto('/personas/new')
+    await page.goto('/#/personas/new')
 
     // Name input
     await expect(page.getByTestId('persona-name-input')).toBeVisible()
@@ -55,7 +55,7 @@ test.describe.serial('US-2 — Persona Management', () => {
   test('AS2 — Save persona: creating a persona navigates to the list and shows the new entry', async ({
     page,
   }) => {
-    await page.goto('/personas/new')
+    await page.goto('/#/personas/new')
 
     // Fill in name and system prompt
     await page.getByTestId('persona-name-input').fill('Business Partner')
@@ -74,7 +74,7 @@ test.describe.serial('US-2 — Persona Management', () => {
   })
 
   test('AS3 — Image upload: file input exists for avatar image', async ({ page }) => {
-    await page.goto('/personas/new')
+    await page.goto('/#/personas/new')
 
     // Verify the file input is present in the DOM
     const fileInput = page.getByTestId('persona-image-input')
@@ -85,7 +85,7 @@ test.describe.serial('US-2 — Persona Management', () => {
     page,
   }) => {
     // Create a persona with a distinctive system prompt
-    await page.goto('/personas/new')
+    await page.goto('/#/personas/new')
     await page.getByTestId('persona-name-input').fill('Test Persona')
     await page
       .getByTestId('persona-prompt-input')
@@ -142,7 +142,7 @@ test.describe.serial('US-2 — Persona Management', () => {
     page,
   }) => {
     // Create a persona without uploading an image
-    await page.goto('/personas/new')
+    await page.goto('/#/personas/new')
     await page.getByTestId('persona-name-input').fill('No Image Persona')
     await page
       .getByTestId('persona-prompt-input')

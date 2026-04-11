@@ -45,7 +45,7 @@ test.describe('US5: Whitespace Preservation', () => {
       localStorage.setItem('han-chat-personas', JSON.stringify(data))
     }, personaData)
 
-    await page.goto('/chat/test-ws')
+    await page.goto('/#/chat/test-ws')
 
     const msgEl = page.getByTestId('message-assistant').first()
     await expect(msgEl).toBeVisible()

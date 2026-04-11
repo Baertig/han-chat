@@ -12,7 +12,7 @@ test.describe('US7: Text Size', () => {
 
   // T043: Text size control and persistence
   test('Settings has text size control and changes apply globally', async ({ page }) => {
-    await page.goto('/settings')
+    await page.goto('/#/settings')
 
     // Text size control should exist
     const textSizeSection = page.getByTestId('text-size-control')
@@ -30,7 +30,7 @@ test.describe('US7: Text Size', () => {
 
     // Reload and verify persistence
     await page.reload()
-    await page.goto('/settings')
+    await page.goto('/#/settings')
 
     const persistedSize = await page.evaluate(() =>
       document.documentElement.style.getPropertyValue('--text-size-base').trim(),

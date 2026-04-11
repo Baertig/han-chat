@@ -80,7 +80,7 @@ test.describe('US1: Theming — Color Scheme', () => {
     expect(await getBodyBg(page)).toBe(LIGHT.bgMain)
 
     // Settings screen
-    await page.goto('/settings')
+    await page.goto('/#/settings')
     expect(await getBodyBg(page)).toBe(LIGHT.bgMain)
   })
 
@@ -92,7 +92,7 @@ test.describe('US1: Theming — Color Scheme', () => {
     expect(await getBodyBg(page)).toBe(DARK.bgMain)
 
     // Settings screen
-    await page.goto('/settings')
+    await page.goto('/#/settings')
     expect(await getBodyBg(page)).toBe(DARK.bgMain)
   })
 

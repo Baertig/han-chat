@@ -14,7 +14,7 @@ test.describe('Settings', () => {
   })
 
   test('All settings fields are visible', async ({ page }) => {
-    await page.goto('/settings')
+    await page.goto('/#/settings')
 
     // API key input
     await expect(page.getByTestId('api-key-input')).toBeVisible()
@@ -30,7 +30,7 @@ test.describe('Settings', () => {
   })
 
   test('Save API key without crashing', async ({ page }) => {
-    await page.goto('/settings')
+    await page.goto('/#/settings')
 
     const apiKeyInput = page.getByTestId('api-key-input')
     await apiKeyInput.fill('sk-test-key')
@@ -43,7 +43,7 @@ test.describe('Settings', () => {
   })
 
   test('Context window value persists across navigation', async ({ page }) => {
-    await page.goto('/settings')
+    await page.goto('/#/settings')
 
     const contextInput = page.getByTestId('context-window-input')
     await contextInput.clear()
@@ -51,10 +51,9 @@ test.describe('Settings', () => {
 
     // Navigate away to home
     await page.goto('/')
-    await expect(page).toHaveURL('/')
 
     // Navigate back to settings
-    await page.goto('/settings')
+    await page.goto('/#/settings')
 
     // The context window should still be 15
     await expect(page.getByTestId('context-window-input')).toHaveValue('15')
